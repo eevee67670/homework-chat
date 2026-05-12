@@ -1,0 +1,4741 @@
+<!doctype html>
+<html lang="en">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Homework Chat - Battle Edition</title>
+  <script src="/_sdk/data_sdk.js"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <style>
+    body {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+    }
+
+    html, body, #app {
+      height: 100%;
+      width: 100%;
+    }
+
+    #app {
+      display: flex;
+      flex-direction: column;
+      overflow: auto;
+    }
+
+    .login-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100%;
+      padding: 20px;
+    }
+
+    .login-container {
+      background: white;
+      padding: 40px;
+      border-radius: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+      max-width: 400px;
+      width: 100%;
+    }
+
+    .login-container h1 {
+      margin: 0 0 10px 0;
+      color: #667eea;
+      text-align: center;
+      font-size: 32px;
+    }
+
+    .login-container p {
+      margin: 0 0 30px 0;
+      text-align: center;
+      color: #666;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .form-group input, .form-group select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+      box-sizing: border-box;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      margin-bottom: 10px;
+      display: block;
+    }
+
+    .btn:hover {
+      background: #5568d3;
+    }
+
+    .btn-secondary {
+      background: #764ba2;
+    }
+    
+    .btn-secondary:hover {
+      background: #6a3d91;
+    }
+
+    .btn-small {
+      padding: 8px 12px;
+      font-size: 14px;
+      border-radius: 6px;
+      background: #27ae60;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.3s;
+      width: auto;
+    }
+
+    .btn-small:hover {
+      background: #229954;
+    }
+
+    .btn-danger {
+      background: #e74c3c;
+    }
+
+    .btn-danger:hover {
+      background: #c0392b;
+    }
+
+    .btn-warning {
+      background: #f39c12;
+    }
+
+    .btn-warning:hover {
+      background: #e67e22;
+    }
+
+    .message {
+      padding: 10px;
+      border-radius: 6px;
+      margin-top: 10px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .error-message {
+      background: #fee;
+      color: #e74c3c;
+      border: 1px solid #e74c3c;
+    }
+
+    .success-message {
+      background: #e8f5e9;
+      color: #27ae60;
+      border: 1px solid #27ae60;
+    }
+
+    .info-message {
+      background: #e3f2fd;
+      color: #2196f3;
+      border: 1px solid #2196f3;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .shop-item {
+      background: #34495e;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      color: white;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .pet-item {
+      background: #34495e;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      color: white;
+    }
+
+    .pet-display {
+      font-size: 36px;
+      text-align: center;
+      margin: 10px 0;
+    }
+
+    .rarity-common { color: #95a5a6; }
+    .rarity-uncommon { color: #27ae60; }
+    .rarity-rare { color: #3498db; }
+    .rarity-epic { color: #9b59b6; }
+    .rarity-legendary { color: #f39c12; }
+    .rarity-supreme { color: #ff0000; font-weight: bold; text-shadow: 0 0 10px #ff0000; }
+    .rarity-exclusive { color: #00ffff; font-weight: bold; }
+
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #27ae60;
+      color: white;
+      padding: 15px 20px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      z-index: 2000;
+      animation: slideIn 0.3s;
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(400px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 20px;
+    }
+
+    .modal {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80%;
+      overflow-y: auto;
+    }
+
+    .modal h3 {
+      margin: 0 0 20px 0;
+      color: #2c3e50;
+    }
+
+    .pet-slot {
+      background: rgba(255,255,255,0.1);
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 8px;
+      padding: 10px;
+      margin: 5px;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .pet-slot:hover {
+      background: rgba(255,255,255,0.2);
+      border-color: #3498db;
+    }
+
+    .pet-slot.selected {
+      background: rgba(52, 152, 219, 0.3);
+      border-color: #3498db;
+      box-shadow: 0 0 15px rgba(52, 152, 219, 0.5);
+    }
+
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      background: #f5f5f5;
+    }
+
+    .chat-message {
+      margin-bottom: 15px;
+      padding: 10px 15px;
+      border-radius: 8px;
+      max-width: 70%;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .chat-message.user {
+      background: #667eea;
+      color: white;
+      margin-left: auto;
+      flex-direction: row-reverse;
+    }
+
+    .chat-message.bot {
+      background: white;
+      color: #333;
+    }
+
+    .chat-message .profile-pic {
+      font-size: 24px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.1);
+      flex-shrink: 0;
+    }
+
+    .chat-message .message-content {
+      flex: 1;
+    }
+
+    .chat-message .username {
+      font-weight: bold;
+      font-size: 12px;
+      margin-bottom: 4px;
+      opacity: 0.8;
+    }
+
+    .chat-message .delete-btn {
+      margin-left: 10px;
+      padding: 2px 8px;
+      background: rgba(0,0,0,0.2);
+      border: none;
+      border-radius: 4px;
+      color: white;
+      cursor: pointer;
+      font-size: 11px;
+    }
+
+    .chat-message .delete-btn:hover {
+      background: rgba(0,0,0,0.4);
+    }
+
+    .chat-input-area {
+      padding: 20px;
+      background: white;
+      border-top: 2px solid #e0e0e0;
+      display: flex;
+      gap: 10px;
+    }
+
+    .chat-input-area input {
+      flex: 1;
+      padding: 12px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    .role-badge {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: bold;
+      margin-left: 5px;
+    }
+
+    .role-owner { background: #f39c12; color: white; }
+    .role-coowner { background: #e67e22; color: white; }
+    .role-admin { background: #e74c3c; color: white; }
+    .role-mod { background: #3498db; color: white; }
+    .role-gamer { background: #9b59b6; color: white; }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+  <script src="https://cdn.tailwindcss.com/3.4.17" type="text/javascript"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js" type="text/javascript"></script>
+ </head>
+ <body>
+  <div id="app">
+   <div id="loginScreen" class="login-screen">
+    <div class="login-container">
+     <h1 id="appTitle">Homework Chat</h1>
+     <p id="welcomeMessage">Welcome to Homework Chat!</p>
+     <div id="loginForm">
+      <div class="form-group">
+       <label for="usernameInput">Username</label> <input type="text" id="usernameInput" placeholder="Enter username">
+      </div>
+      <div class="form-group">
+       <label for="passwordInput">Password</label> <input type="password" id="passwordInput" placeholder="Enter password">
+      </div><button class="btn" id="btnSignIn" type="button">Sign In</button> <button class="btn btn-secondary" id="btnCreateAccount" type="button">Create New Account</button>
+      <div class="form-group" id="schoolPasswordField" style="display: none;">
+       <label for="schoolPasswordInput">School Password (Required 6am-3pm)</label> <input type="password" id="schoolPasswordInput" placeholder="Enter school password">
+      </div>
+      <div id="loginMessage" class="message hidden"></div>
+     </div>
+     <div id="registerForm" class="hidden">
+      <div class="form-group">
+       <label for="newUsername">Username</label> <input type="text" id="newUsername" placeholder="Choose username">
+      </div>
+      <div class="form-group">
+       <label for="newPassword">Password</label> <input type="password" id="newPassword" placeholder="Choose password">
+      </div>
+      <div class="form-group">
+       <label for="gradeLevel">Grade Level</label> <select id="gradeLevel"> <option value="1">1st Grade</option> <option value="2">2nd Grade</option> <option value="3">3rd Grade</option> <option value="4">4th Grade</option> <option value="5">5th Grade</option> <option value="6">6th Grade</option> <option value="7">7th Grade</option> <option value="8">8th Grade</option> <option value="9">9th Grade</option> <option value="10">10th Grade</option> <option value="11">11th Grade</option> <option value="12">12th Grade</option> </select>
+      </div><button class="btn" id="btnRegister" type="button">Create Account</button> <button class="btn btn-secondary" id="btnBackToLogin" type="button">Back to Sign In</button>
+      <div id="registerMessage" class="message hidden"></div>
+     </div>
+    </div>
+   </div>
+   <div id="mainApp" class="hidden" style="display: flex; height: 100%; width: 100%;">
+    <div style="width: 300px; background: #2c3e50; color: white; display: flex; flex-direction: column; overflow-y: auto;">
+     <div style="padding: 20px; background: #34495e; border-bottom: 2px solid #1a252f;">
+      <div style="width: 60px; height: 60px; font-size: 40px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: #667eea; margin: 0 auto 15px; cursor: pointer; transition: transform 0.2s;" id="profilePic" onclick="openProfileSettings()">
+       📚
+      </div>
+      <h3 style="text-align: center; margin: 0;" id="currentUsername">User</h3>
+      <div id="roleDisplay" style="text-align: center; margin-top: 5px; font-size: 12px; color: #95a5a6;"></div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px;">
+       <div style="background: #2c3e50; padding: 8px; border-radius: 6px; text-align: center;">
+        <div style="font-size: 18px; font-weight: bold; color: #3498db;" id="userCoins">
+         0
+        </div>
+        <div style="font-size: 11px; color: #95a5a6;">
+         Coins
+        </div>
+       </div>
+       <div style="background: #2c3e50; padding: 8px; border-radius: 6px; text-align: center;">
+        <div style="font-size: 18px; font-weight: bold; color: #3498db;" id="userXP">
+         0
+        </div>
+        <div style="font-size: 11px; color: #95a5a6;">
+         XP
+        </div>
+       </div>
+      </div>
+     </div>
+     <div style="flex: 1; overflow-y: auto; padding: 15px;">
+      <h3 style="margin: 0 0 10px 0;">Menu</h3><button class="btn" onclick="openChat()" style="margin-bottom: 10px;">💬 Chat</button> <button class="btn" onclick="openMail()" style="margin-bottom: 10px;">📧 Mail</button> <button class="btn" onclick="openMath()" style="margin-bottom: 10px;">➗ Math Help</button> <button class="btn" onclick="openBattles()" style="margin-bottom: 10px;">⚔️ Battles</button> <button class="btn" onclick="openShop()" style="margin-bottom: 10px;">🛒 Shop</button> <button class="btn" onclick="openInventory()" style="margin-bottom: 10px;">🎒 Inventory</button> <button class="btn" onclick="openPets()" style="margin-bottom: 10px;">🐾 Pets</button> <button class="btn" onclick="openFriends()" style="margin-bottom: 10px;">👥 Friends</button> <button class="btn" id="btnAllUsers" onclick="openAllUsers()" style="margin-bottom: 10px;">👥 All Users</button> <button class="btn" id="globalSettingsBtn" onclick="openGlobalSettings()" style="background: #f39c12; margin-bottom: 10px; display: none;">⚙️ Homework Chat Global Settings</button> <button class="btn" style="background: #e74c3c; margin-top: 20px;" onclick="handleSignOut()">Sign Out</button>
+     </div>
+    </div>
+    <div style="flex: 1; display: flex; flex-direction: column; background: white;">
+     <div style="background: #34495e; color: white; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center;">
+      <h2 id="currentScreenTitle">Welcome!</h2>
+     </div>
+     <div style="flex: 1; overflow-y: auto; padding: 20px;" id="mainContent">
+      <div style="text-align: center; padding: 40px;">
+       <h2>🎉 Welcome to Homework Chat!</h2>
+       <p>Select an option from the menu to get started.</p>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+    let currentUser = null;
+    let allUsers = [];
+    let isInitialized = false;
+    let battleRecords = [];
+    let chatMessages = [];
+    let tradeOffers = [];
+    let mailMessages = [];
+    let schoolPasswordRequired = false;
+    let unreadMentions = 0;
+    let schoolPassword = 'school123';
+    
+    function openGlobalSettings() {
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      
+      const modalContent = document.createElement('div');
+      modalContent.className = 'modal';
+      
+      const title = document.createElement('h3');
+      title.innerHTML = '⚙️ Homework Chat Global Settings';
+      title.style.color = '#f39c12';
+      modalContent.appendChild(title);
+      
+      const tabs = document.createElement('div');
+      tabs.style.display = 'flex';
+      tabs.style.gap = '10px';
+      tabs.style.marginBottom = '20px';
+      tabs.style.borderBottom = '2px solid #e0e0e0';
+      tabs.style.paddingBottom = '10px';
+      
+      const tabNames = ['School Password', 'Add Pets', 'Edit Pets', 'Legendary Seeds'];
+      const tabContents = {};
+      let activeTab = 'School Password';
+      
+      const contentDiv = document.createElement('div');
+      contentDiv.id = 'tabContent';
+      
+      const switchTab = (tabName) => {
+        activeTab = tabName;
+        contentDiv.innerHTML = '';
+        contentDiv.appendChild(tabContents[tabName]);
+        
+        document.querySelectorAll('#settingsTabs button').forEach(btn => {
+          btn.style.background = btn.textContent.includes(tabName) ? '#f39c12' : '#667eea';
+        });
+      };
+      
+      tabNames.forEach(tabName => {
+        const btn = document.createElement('button');
+        btn.className = 'btn-small';
+        btn.type = 'button';
+        btn.textContent = tabName;
+        btn.style.flex = '1';
+        btn.style.background = tabName === 'School Password' ? '#f39c12' : '#667eea';
+        btn.onclick = () => switchTab(tabName);
+        tabs.appendChild(btn);
+      });
+      tabs.id = 'settingsTabs';
+      modalContent.appendChild(tabs);
+      
+      // School Password Tab
+      const schoolPasswordTab = document.createElement('div');
+      schoolPasswordTab.innerHTML = `
+        <h4>Change School Password</h4>
+        <p style="color: #95a5a6; margin-bottom: 15px;">This password is required to log in between 6am-3pm</p>
+        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Current Password:</label>
+        <div style="background: #f5f5f5; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-family: monospace;">
+          ${schoolPassword}
+        </div>
+        <label style="display: block; margin-bottom: 5px; font-weight: 600;">New Password:</label>
+        <input type="text" id="newSchoolPass" placeholder="Enter new school password" style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 6px; border: 2px solid #e0e0e0; box-sizing: border-box;">
+        <button class="btn" type="button" onclick="updateSchoolPassword()" style="margin-bottom: 10px;">✅ Update Password</button>
+      `;
+      tabContents['School Password'] = schoolPasswordTab;
+      
+      // Add Pets Tab
+      const addPetsTab = document.createElement('div');
+      addPetsTab.innerHTML = `
+        <h4>Create New Pet</h4>
+        <p style="color: #95a5a6; margin-bottom: 15px;">Create a custom pet by selecting emoji and entering details</p>
+        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Pet Emoji:</label>
+        <input type="text" id="newPetEmoji" placeholder="Enter emoji (e.g., 🦁)" style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 6px; border: 2px solid #e0e0e0; box-sizing: border-box;">
+        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Pet Name:</label>
+        <input type="text" id="newPetName" placeholder="Enter pet name" style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 6px; border: 2px solid #e0e0e0; box-sizing: border-box;">
+        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Pet HP:</label>
+        <input type="number" id="newPetHP" placeholder="Enter HP value" min="1" value="100" style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 6px; border: 2px solid #e0e0e0; box-sizing: border-box;">
+        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Rarity:</label>
+        <select id="newPetRarity" style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 6px; border: 2px solid #e0e0e0; box-sizing: border-box;">
+          <option value="common">Common</option>
+          <option value="uncommon">Uncommon</option>
+          <option value="rare">Rare</option>
+          <option value="heroic">Heroic</option>
+          <option value="legendary">Legendary</option>
+          <option value="supreme">Supreme</option>
+          <option value="exclusive">Exclusive</option>
+        </select>
+        <button class="btn" type="button" onclick="createNewPet()" style="margin-bottom: 15px;">✨ Add New Pet</button>
+        <h4 style="margin-top: 20px;">Select & Add Pets to My Pets</h4>
+        <p style="color: #95a5a6; margin-bottom: 15px;">Choose rarity to filter pets, then click ➕ Add</p>
+        <div style="display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap;">
+          <button class="btn-small" type="button" onclick="filterAddPets('all')" style="background: #3498db;">📋 All</button>
+          <button class="btn-small" type="button" onclick="filterAddPets('common')" style="background: #95a5a6;">⚪ Common</button>
+          <button class="btn-small" type="button" onclick="filterAddPets('uncommon')" style="background: #27ae60;">🟢 Uncommon</button>
+          <button class="btn-small" type="button" onclick="filterAddPets('rare')" style="background: #3498db;">🔵 Rare</button>
+          <button class="btn-small" type="button" onclick="filterAddPets('heroic')" style="background: #e67e22;">🟠 Heroic</button>
+          <button class="btn-small" type="button" onclick="filterAddPets('legendary')" style="background: #f39c12;">⭐ Legendary</button>
+          <button class="btn-small" type="button" onclick="filterAddPets('supreme')" style="background: #e74c3c;">🔴 Supreme</button>
+          <button class="btn-small" type="button" onclick="filterAddPets('exclusive')" style="background: #9b59b6;">💜 Exclusive</button>
+        </div>
+        <button class="btn-small" type="button" onclick="addLegendaryPetSeed()" style="width: 100%; margin-bottom: 15px;">🌱✨ Get Legendary Pet Seed</button>
+        <div id="allPetsList" style="max-height: 600px; overflow-y: auto; padding: 10px; background: #34495e; border-radius: 8px; list-style: none; margin: 0; padding: 10px;"></div>
+      `;
+      
+      setTimeout(() => {
+        filterAddPets('all');
+      }, 100);
+      
+      tabContents['Add Pets'] = addPetsTab;
+      
+      // Edit Pets Tab
+      const editPetsTab = document.createElement('div');
+      editPetsTab.innerHTML = `
+        <h4>Edit Global Pets</h4>
+        <p style="color: #95a5a6; margin-bottom: 15px;">Click ✏️ Edit to modify pet stats globally</p>
+        <div style="display: flex; gap: 8px; margin-bottom: 15px; flex-wrap: wrap;">
+          <button class="btn-small" type="button" onclick="filterEditPets('all')" style="background: #3498db;">📋 All</button>
+          <button class="btn-small" type="button" onclick="filterEditPets('common')" style="background: #95a5a6;">⚪ Common</button>
+          <button class="btn-small" type="button" onclick="filterEditPets('uncommon')" style="background: #27ae60;">🟢 Uncommon</button>
+          <button class="btn-small" type="button" onclick="filterEditPets('rare')" style="background: #3498db;">🔵 Rare</button>
+          <button class="btn-small" type="button" onclick="filterEditPets('heroic')" style="background: #e67e22;">🟠 Heroic</button>
+          <button class="btn-small" type="button" onclick="filterEditPets('legendary')" style="background: #f39c12;">⭐ Legendary</button>
+          <button class="btn-small" type="button" onclick="filterEditPets('supreme')" style="background: #e74c3c;">🔴 Supreme</button>
+          <button class="btn-small" type="button" onclick="filterEditPets('exclusive')" style="background: #9b59b6;">💜 Exclusive</button>
+        </div>
+        <div id="editPetsList" style="max-height: 600px; overflow-y: auto; padding: 10px; background: #34495e; border-radius: 8px; list-style: none; margin: 0; padding: 10px;"></div>
+      `;
+      
+      setTimeout(() => {
+        filterEditPets('all');
+      }, 100);
+      
+      tabContents['Edit Pets'] = editPetsTab;
+      const seedsTab = document.createElement('div');
+      seedsTab.innerHTML = `
+        <h4>Legendary Pet Seeds</h4>
+        <p style="color: #95a5a6; margin-bottom: 15px;">Send legendary pet seeds to players or get them</p>
+        <label style="display: block; margin-bottom: 5px; font-weight: 600;">Number of Seeds:</label>
+        <input type="number" id="seedCount" value="1" min="1" max="1000" style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 6px; border: 2px solid #e0e0e0; box-sizing: border-box;">
+        <h5 style="margin-top: 15px; margin-bottom: 10px;">Owner Actions:</h5>
+        <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+          <button class="btn-small" style="background: #f39c12;" type="button" onclick="addLegendarySeeds()">🌱✨ Get Seeds to Inventory</button>
+          <button class="btn-small" style="background: #9b59b6;" type="button" onclick="sendLegendarySeeds('one')">👤 Send to One</button>
+          <button class="btn-small" style="background: #9b59b6;" type="button" onclick="sendLegendarySeeds('all')">👥 Send to Everyone</button>
+        </div>
+        <div id="seedResult"></div>
+      `;
+      tabContents['Legendary Seeds'] = seedsTab;
+      
+      contentDiv.appendChild(tabContents['School Password']);
+      modalContent.appendChild(contentDiv);
+      
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'btn btn-secondary';
+      closeBtn.type = 'button';
+      closeBtn.textContent = 'Close';
+      closeBtn.style.marginTop = '20px';
+      closeBtn.onclick = () => modal.remove();
+      modalContent.appendChild(closeBtn);
+      
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+    }
+    
+    function updateSchoolPassword() {
+      const newPass = document.getElementById('newSchoolPass').value.trim();
+      if (!newPass) {
+        showNotification('Enter a new password!', true);
+        return;
+      }
+      schoolPassword = newPass;
+      showNotification('✅ School password updated globally!');
+      document.getElementById('newSchoolPass').value = '';
+      setTimeout(() => openGlobalSettings(), 1500);
+    }
+    
+    function openGlobalPetEditDialog(petType, petEmoji, currentName, currentRarity, currentHP) {
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      
+      const modalContent = document.createElement('div');
+      modalContent.className = 'modal';
+      
+      const title = document.createElement('h3');
+      title.innerHTML = `✏️ Edit Pet - ${petEmoji} ${currentName}`;
+      title.style.color = '#f39c12';
+      modalContent.appendChild(title);
+      
+      const nameLabel = document.createElement('label');
+      nameLabel.textContent = 'Pet Name:';
+      nameLabel.style.display = 'block';
+      nameLabel.style.marginBottom = '5px';
+      nameLabel.style.fontWeight = '600';
+      modalContent.appendChild(nameLabel);
+      
+      const nameInput = document.createElement('input');
+      nameInput.type = 'text';
+      nameInput.id = 'globalPetName';
+      nameInput.value = currentName;
+      nameInput.style.width = '100%';
+      nameInput.style.padding = '10px';
+      nameInput.style.marginBottom = '15px';
+      nameInput.style.borderRadius = '6px';
+      nameInput.style.border = '2px solid #e0e0e0';
+      nameInput.style.boxSizing = 'border-box';
+      modalContent.appendChild(nameInput);
+      
+      const hpLabel = document.createElement('label');
+      hpLabel.textContent = 'Pet HP:';
+      hpLabel.style.display = 'block';
+      hpLabel.style.marginBottom = '5px';
+      hpLabel.style.fontWeight = '600';
+      modalContent.appendChild(hpLabel);
+      
+      const hpInput = document.createElement('input');
+      hpInput.type = 'number';
+      hpInput.id = 'globalPetHP';
+      hpInput.value = currentHP;
+      hpInput.min = '1';
+      hpInput.style.width = '100%';
+      hpInput.style.padding = '10px';
+      hpInput.style.marginBottom = '15px';
+      hpInput.style.borderRadius = '6px';
+      hpInput.style.border = '2px solid #e0e0e0';
+      hpInput.style.boxSizing = 'border-box';
+      modalContent.appendChild(hpInput);
+      
+      const rarityLabel = document.createElement('label');
+      rarityLabel.textContent = 'Rarity:';
+      rarityLabel.style.display = 'block';
+      rarityLabel.style.marginBottom = '5px';
+      rarityLabel.style.fontWeight = '600';
+      modalContent.appendChild(rarityLabel);
+      
+      const raritySelect = document.createElement('select');
+      raritySelect.id = 'globalPetRarity';
+      raritySelect.style.width = '100%';
+      raritySelect.style.padding = '10px';
+      raritySelect.style.marginBottom = '15px';
+      raritySelect.style.borderRadius = '6px';
+      raritySelect.style.border = '2px solid #e0e0e0';
+      raritySelect.style.boxSizing = 'border-box';
+      
+      const rarities = ['common', 'uncommon', 'rare', 'heroic', 'legendary', 'supreme', 'exclusive'];
+      rarities.forEach(rarity => {
+        const option = document.createElement('option');
+        option.value = rarity;
+        option.textContent = rarity.charAt(0).toUpperCase() + rarity.slice(1);
+        if (rarity === currentRarity) option.selected = true;
+        raritySelect.appendChild(option);
+      });
+      modalContent.appendChild(raritySelect);
+      
+      const emojiLabel = document.createElement('label');
+      emojiLabel.textContent = 'Pet Emoji:';
+      emojiLabel.style.display = 'block';
+      emojiLabel.style.marginBottom = '5px';
+      emojiLabel.style.fontWeight = '600';
+      modalContent.appendChild(emojiLabel);
+      
+      const emojiInput = document.createElement('input');
+      emojiInput.type = 'text';
+      emojiInput.id = 'globalPetEmoji';
+      emojiInput.value = petEmoji;
+      emojiInput.placeholder = 'Enter emoji';
+      emojiInput.style.width = '100%';
+      emojiInput.style.padding = '10px';
+      emojiInput.style.marginBottom = '15px';
+      emojiInput.style.borderRadius = '6px';
+      emojiInput.style.border = '2px solid #e0e0e0';
+      emojiInput.style.boxSizing = 'border-box';
+      modalContent.appendChild(emojiInput);
+      
+      const saveBtn = document.createElement('button');
+      saveBtn.className = 'btn';
+      saveBtn.style.background = '#f39c12';
+      saveBtn.type = 'button';
+      saveBtn.textContent = '💾 Save Changes';
+      saveBtn.onclick = () => {
+        const newName = document.getElementById('globalPetName').value.trim();
+        const newHP = parseInt(document.getElementById('globalPetHP').value);
+        const newRarity = document.getElementById('globalPetRarity').value;
+        const newEmoji = document.getElementById('globalPetEmoji').value.trim();
+        
+        if (!newName) {
+          showNotification('Enter a pet name!', true);
+          return;
+        }
+        
+        if (isNaN(newHP) || newHP < 1) {
+          showNotification('Enter a valid HP value (1 or higher)!', true);
+          return;
+        }
+        
+        if (!newEmoji) {
+          showNotification('Enter an emoji!', true);
+          return;
+        }
+        
+        // Update base pet
+        petNamesByType[petType] = newName;
+        petHPByType[petType] = newHP;
+        petRarityByType[petType] = newRarity;
+        
+        // If emoji changed, update the emoji mapping
+        if (newEmoji !== petEmoji) {
+          delete petTypes[petEmoji];
+          petTypes[newEmoji] = petType;
+        }
+        
+        showNotification(`✅ ${newEmoji} ${newName} updated globally!`);
+        
+        modal.remove();
+        openGlobalSettings();
+      };
+      modalContent.appendChild(saveBtn);
+      
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'btn btn-secondary';
+      cancelBtn.type = 'button';
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.onclick = () => modal.remove();
+      modalContent.appendChild(cancelBtn);
+      
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+    }
+    
+    async function createNewPet() {
+      const emoji = document.getElementById('newPetEmoji').value.trim();
+      const name = document.getElementById('newPetName').value.trim();
+      const hp = parseInt(document.getElementById('newPetHP').value) || 100;
+      const rarity = document.getElementById('newPetRarity').value;
+      
+      if (!emoji || !name) {
+        showNotification('Enter emoji and pet name!', true);
+        return;
+      }
+      
+      // Add base pet to database
+      const petTypeKey = name.toLowerCase().replace(/\s+/g, '_');
+      petTypes[emoji] = petTypeKey;
+      petHPByType[petTypeKey] = hp;
+      petRarityByType[petTypeKey] = rarity;
+      petNamesByType[petTypeKey] = name;
+      
+      showNotification(`✨ Created new pet ${emoji} ${name}!`);
+      
+      // Clear inputs
+      document.getElementById('newPetEmoji').value = '';
+      document.getElementById('newPetName').value = '';
+      document.getElementById('newPetHP').value = '100';
+      document.getElementById('newPetRarity').value = 'common';
+      
+      // Refresh the pet list
+      filterAddPets('all');
+    }
+    
+    function filterAddPets(rarity) {
+      const petsListDiv = document.getElementById('allPetsList');
+      if (!petsListDiv) return;
+      
+      petsListDiv.innerHTML = '';
+      
+      const uniquePets = {};
+      Object.entries(petTypes).forEach(([emoji, type]) => {
+        if (!uniquePets[type]) {
+          uniquePets[type] = emoji;
+        }
+      });
+      
+      Object.entries(uniquePets).forEach(([type, emoji]) => {
+        const name = petNamesByType[type] || 'Unknown';
+        const petRarity = petRarityByType[type] || 'common';
+        const hp = petHPByType[type] || 100;
+        
+        if (rarity !== 'all' && petRarity !== rarity) return;
+        
+        const petItem = document.createElement('div');
+        petItem.style.background = '#2c3e50';
+        petItem.style.border = '2px solid #3498db';
+        petItem.style.borderRadius = '8px';
+        petItem.style.padding = '12px';
+        petItem.style.marginBottom = '10px';
+        petItem.style.display = 'flex';
+        petItem.style.alignItems = 'flex-start';
+        petItem.style.gap = '12px';
+        petItem.style.transition = 'all 0.3s ease';
+        
+        petItem.onmouseover = () => {
+          petItem.style.background = '#34495e';
+          petItem.style.borderColor = '#2ecc71';
+        };
+        petItem.onmouseout = () => {
+          petItem.style.background = '#2c3e50';
+          petItem.style.borderColor = '#3498db';
+        };
+        
+        const petEmoji = document.createElement('div');
+        petEmoji.style.fontSize = '32px';
+        petEmoji.style.flexShrink = '0';
+        petEmoji.textContent = emoji;
+        petItem.appendChild(petEmoji);
+        
+        const petInfo = document.createElement('div');
+        petInfo.style.flex = '1';
+        petInfo.style.minWidth = '0';
+        
+        const petNameDiv = document.createElement('div');
+        petNameDiv.style.fontWeight = '700';
+        petNameDiv.style.color = '#ecf0f1';
+        petNameDiv.style.fontSize = '14px';
+        petNameDiv.style.marginBottom = '4px';
+        petNameDiv.textContent = name;
+        petInfo.appendChild(petNameDiv);
+        
+        const petStatsDiv = document.createElement('div');
+        petStatsDiv.style.fontSize = '12px';
+        petStatsDiv.style.color = '#bdc3c7';
+        petStatsDiv.innerHTML = `❤️ ${hp} HP | <span class="rarity-${petRarity}" style="padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 700;">${petRarity.toUpperCase()}</span>`;
+        petInfo.appendChild(petStatsDiv);
+        
+        petItem.appendChild(petInfo);
+        
+        const addBtn = document.createElement('button');
+        addBtn.className = 'btn-small';
+        addBtn.style.background = '#27ae60';
+        addBtn.style.border = 'none';
+        addBtn.style.color = 'white';
+        addBtn.style.padding = '8px 12px';
+        addBtn.style.flexShrink = '0';
+        addBtn.type = 'button';
+        addBtn.textContent = '➕ Add';
+        addBtn.onclick = async (e) => {
+          e.stopPropagation();
+          addPetToInventory(emoji, petRarity, name, hp);
+          await window.dataSdk.update(currentUser);
+          updateUI();
+          showNotification(`Added ${name} to your pets! 🐾`);
+          openGlobalSettings();
+        };
+        petItem.appendChild(addBtn);
+        
+        petsListDiv.appendChild(petItem);
+      });
+    }
+    
+    function filterEditPets(rarity) {
+      const petsListDiv = document.getElementById('editPetsList');
+      if (!petsListDiv) return;
+      
+      petsListDiv.innerHTML = '';
+      
+      const uniquePets = {};
+      Object.entries(petTypes).forEach(([emoji, type]) => {
+        if (!uniquePets[type]) {
+          uniquePets[type] = emoji;
+        }
+      });
+      
+      Object.entries(uniquePets).forEach(([type, emoji]) => {
+        const name = petNamesByType[type] || 'Unknown';
+        const petRarity = petRarityByType[type] || 'common';
+        const hp = petHPByType[type] || 100;
+        
+        if (rarity !== 'all' && petRarity !== rarity) return;
+        
+        const petItem = document.createElement('div');
+        petItem.style.background = '#2c3e50';
+        petItem.style.border = '2px solid #f39c12';
+        petItem.style.borderRadius = '8px';
+        petItem.style.padding = '12px';
+        petItem.style.marginBottom = '10px';
+        petItem.style.display = 'flex';
+        petItem.style.alignItems = 'flex-start';
+        petItem.style.gap = '12px';
+        petItem.style.transition = 'all 0.3s ease';
+        
+        petItem.onmouseover = () => {
+          petItem.style.background = '#34495e';
+          petItem.style.borderColor = '#e67e22';
+        };
+        petItem.onmouseout = () => {
+          petItem.style.background = '#2c3e50';
+          petItem.style.borderColor = '#f39c12';
+        };
+        
+        const petEmoji = document.createElement('div');
+        petEmoji.style.fontSize = '32px';
+        petEmoji.style.flexShrink = '0';
+        petEmoji.textContent = emoji;
+        petItem.appendChild(petEmoji);
+        
+        const petInfo = document.createElement('div');
+        petInfo.style.flex = '1';
+        petInfo.style.minWidth = '0';
+        
+        const petNameDiv = document.createElement('div');
+        petNameDiv.style.fontWeight = '700';
+        petNameDiv.style.color = '#ecf0f1';
+        petNameDiv.style.fontSize = '14px';
+        petNameDiv.style.marginBottom = '4px';
+        petNameDiv.textContent = name;
+        petInfo.appendChild(petNameDiv);
+        
+        const petStatsDiv = document.createElement('div');
+        petStatsDiv.style.fontSize = '12px';
+        petStatsDiv.style.color = '#bdc3c7';
+        petStatsDiv.innerHTML = `❤️ ${hp} HP | <span class="rarity-${petRarity}" style="padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 700;">${petRarity.toUpperCase()}</span>`;
+        petInfo.appendChild(petStatsDiv);
+        
+        petItem.appendChild(petInfo);
+        
+        const editBtn = document.createElement('button');
+        editBtn.className = 'btn-small';
+        editBtn.style.background = '#f39c12';
+        editBtn.style.border = 'none';
+        editBtn.style.color = 'white';
+        editBtn.style.padding = '8px 12px';
+        editBtn.style.flexShrink = '0';
+        editBtn.type = 'button';
+        editBtn.textContent = '✏️ Edit';
+        editBtn.onclick = (e) => {
+          e.stopPropagation();
+          openGlobalPetEditDialog(type, emoji, name, petRarity, hp);
+        };
+        petItem.appendChild(editBtn);
+        
+        petsListDiv.appendChild(petItem);
+      });
+    }
+    
+    async function addLegendaryPetSeed() {
+      const legendaryEmojis = ['❄️🔥', '🌑', '💥', '✨', '🦅🔥', '❄️❄️', '🧊', '🦙', '✨🌟', '🌸', '🌟❄️', '🔮', '🌊🌟', '🔥🔥🔥', '🌱', '🔥🌸', '⭐❄️', '💪', '🐊', '🦖', '❄️🔥🔥', '💧⚡', '🌊❄️', '🐻❄️', '☀️', '🌙', '🌌', '☀️☀️', '🍄', '🐙', '✨✨', '🐝', '🌊🌊', '🪼', '🐟', '🌅', '👻', '👑❄️', '💬', '🌠', '🍞', '🔪🐱', '👨‍🌾🫐', '💧🐶', '🔥🦊', '⚡🦊', '💧🦊', '🪸🦊', '🌋🪨', '⚡🥥', '⚡🐶', '🌸🌵', '☀️🫐', '🌸🦊', '🤖🥬', '🔥🍄', '⚡🤖', '🍵🍬', '🌊🐱'];
+      const randomEmoji = legendaryEmojis[Math.floor(Math.random() * legendaryEmojis.length)];
+      const petType = petTypes[randomEmoji];
+      const petHP = petHPByType[petType];
+      const petName = petNamesByType[petType];
+      const petRarity = petRarityByType[petType];
+      
+      addPetToInventory(randomEmoji, petRarity, petName, petHP);
+      await window.dataSdk.update(currentUser);
+      updateUI();
+      showNotification(`✨ You got a legendary ${randomEmoji} ${petName}! ✨`);
+      openGlobalSettings();
+    }
+
+    async function addLegendarySeeds() {
+      const seedCount = parseInt(document.getElementById('seedCount').value) || 1;
+      currentUser.legendaryPetSeeds = (currentUser.legendaryPetSeeds || 0) + seedCount;
+      await window.dataSdk.update(currentUser);
+      updateUI();
+      showNotification(`✨ Added ${seedCount} legendary seed(s) to your inventory! 🌱✨`);
+      openGlobalSettings();
+    }
+
+    async function sendLegendarySeeds(type) {
+      const seedCount = parseInt(document.getElementById('seedCount').value) || 1;
+      const resultDiv = document.getElementById('seedResult');
+      resultDiv.innerHTML = '';
+      
+      if (type === 'one') {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        const content = document.createElement('div');
+        content.className = 'modal';
+        content.innerHTML = '<h3>Select Player</h3>';
+        
+        const playerList = document.createElement('div');
+        playerList.style.maxHeight = '300px';
+        playerList.style.overflowY = 'auto';
+        playerList.style.marginBottom = '15px';
+        
+        allUsers.filter(u => u.id !== currentUser.id).forEach(user => {
+          const userBtn = document.createElement('button');
+          userBtn.className = 'btn';
+          userBtn.type = 'button';
+          userBtn.textContent = `${user.username} (${user.coins || 0} 🪙)`;
+          userBtn.style.marginBottom = '8px';
+          userBtn.style.width = '100%';
+          userBtn.onclick = async () => {
+            user.legendaryPetSeeds = (user.legendaryPetSeeds || 0) + seedCount;
+            await window.dataSdk.update(user);
+            showNotification(`Sent ${seedCount} legendary seeds to ${user.username}! 🌱`);
+            modal.remove();
+            openGlobalSettings();
+          };
+          playerList.appendChild(userBtn);
+        });
+        
+        content.appendChild(playerList);
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'btn btn-secondary';
+        cancelBtn.type = 'button';
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.onclick = () => modal.remove();
+        content.appendChild(cancelBtn);
+        
+        modal.appendChild(content);
+        document.body.appendChild(modal);
+      } else if (type === 'all') {
+        const confirmDiv = document.createElement('div');
+        confirmDiv.style.background = '#e8f5e9';
+        confirmDiv.style.padding = '15px';
+        confirmDiv.style.borderRadius = '6px';
+        confirmDiv.style.border = '2px solid #27ae60';
+        confirmDiv.style.marginBottom = '15px';
+        
+        const targetCount = allUsers.length - 1;
+        confirmDiv.innerHTML = `
+          <strong>⚠️ Send ${seedCount} legendary seeds to ALL ${targetCount} players?</strong><br>
+          <small>This will give ${seedCount} legendary seeds to every player on the server.</small>
+        `;
+        
+        const confirmBtn = document.createElement('button');
+        confirmBtn.className = 'btn';
+        confirmBtn.style.background = '#27ae60';
+        confirmBtn.type = 'button';
+        confirmBtn.textContent = '✅ Send to Everyone';
+        confirmBtn.style.marginRight = '10px';
+        confirmBtn.onclick = async () => {
+          confirmBtn.disabled = true;
+          confirmBtn.textContent = 'Sending...';
+          
+          let sent = 0;
+          for (const user of allUsers) {
+            if (user.id !== currentUser.id) {
+              user.legendaryPetSeeds = (user.legendaryPetSeeds || 0) + seedCount;
+              const updateResult = await window.dataSdk.update(user);
+              if (updateResult.isOk) {
+                sent++;
+              }
+              await new Promise(resolve => setTimeout(resolve, 50));
+            }
+          }
+          
+          showNotification(`✅ Sent ${seedCount} seeds to ${sent} players! 🌱`);
+          confirmBtn.textContent = '✅ Complete!';
+          setTimeout(() => {
+            confirmDiv.remove();
+            resultDiv.innerHTML = `<div class="message success-message">✅ Distributed ${seedCount * sent} legendary seeds total!</div>`;
+          }, 500);
+        };
+        confirmDiv.appendChild(confirmBtn);
+        
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'btn-small btn-secondary';
+        cancelBtn.type = 'button';
+        cancelBtn.textContent = 'Cancel';
+        cancelBtn.onclick = () => {
+          confirmDiv.remove();
+        };
+        confirmDiv.appendChild(cancelBtn);
+        
+        resultDiv.appendChild(confirmDiv);
+      }
+    }
+    
+    function checkForMentions() {
+      if (!currentUser) return;
+      
+      const newMentions = chatMessages.filter(msg => {
+        return msg.message.includes(`@${currentUser.username}`) && msg.userId !== currentUser.id;
+      });
+      
+      if (newMentions.length > unreadMentions) {
+        unreadMentions = newMentions.length;
+        updateMentionBadge();
+      }
+    }
+
+    function updateMentionBadge() {
+      const chatBtn = document.querySelector('button[onclick="openChat()"]');
+      if (!chatBtn) return;
+      
+      const oldBadge = chatBtn.querySelector('.mention-badge');
+      if (oldBadge) oldBadge.remove();
+      
+      if (unreadMentions > 0) {
+        const badge = document.createElement('span');
+        badge.className = 'mention-badge';
+        badge.textContent = unreadMentions;
+        badge.style.position = 'absolute';
+        badge.style.top = '-5px';
+        badge.style.right = '-5px';
+        badge.style.background = '#e74c3c';
+        badge.style.color = 'white';
+        badge.style.borderRadius = '50%';
+        badge.style.width = '20px';
+        badge.style.height = '20px';
+        badge.style.display = 'flex';
+        badge.style.alignItems = 'center';
+        badge.style.justifyContent = 'center';
+        badge.style.fontSize = '12px';
+        badge.style.fontWeight = 'bold';
+        badge.style.animation = 'pulse 1.5s infinite';
+        
+        chatBtn.style.position = 'relative';
+        chatBtn.appendChild(badge);
+        
+        document.title = `(${unreadMentions}) Homework Chat - Battle Edition`;
+      } else {
+        document.title = 'Homework Chat - Battle Edition';
+      }
+    }
+
+    const style = document.createElement('style');
+    style.textContent = `
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+      }
+    `;
+    document.head.appendChild(style);
+
+    function checkSchoolHours() {
+      const now = new Date();
+      const day = now.getDay();
+      const isWeekend = day === 0 || day === 6;
+      
+      if (isWeekend) {
+        schoolPasswordRequired = false;
+        return false;
+      }
+      
+      const hour = now.getHours();
+      schoolPasswordRequired = hour >= 6 && hour < 15;
+      return schoolPasswordRequired;
+    }
+    
+    function updateSchoolPasswordFieldVisibility() {
+      const schoolField = document.getElementById('schoolPasswordField');
+      if (schoolField) {
+        schoolField.style.display = checkSchoolHours() ? 'block' : 'none';
+      }
+    }
+    
+    // Update school password visibility immediately and every minute
+    updateSchoolPasswordFieldVisibility();
+    setInterval(updateSchoolPasswordFieldVisibility, 60000);
+
+    const petTypes = {
+      // Common
+      '🐶': 'dog', '🐱': 'cat', '🐭': 'mouse', '🦊': 'fox', '🐻': 'bear',
+      '🔥': 'fidough', '🦆': 'quack', '🐦': 'squacks', '❄️': 'ice_neek', '🌲': 'forest_neek',
+      '🔥🟠': 'flame_neek', '💧': 'river_neek', '☁️': 'cloud_neek',
+      '🌸🐱': 'florakitty', '🔥🐱': 'pyrokitty', '💧🐱': 'aquakitty', '🔥🥥': 'pyrococo', '🌸🥥': 'floracoco',
+      '🌸🌵': 'floracacti', '💧🍄': 'aquamush', '💧🌵': 'aquacacti', '🔥🫐': 'pyroberry', '⚡🍄': 'electromush',
+      '🔥🍄': 'pyromush', '⚡🫐': 'electroberry', '🌸🫐': 'floraberry',
+      // Uncommon
+      '🌲🔥': 'forest_caller', '☁️🔥': 'cloud_caller', '❄️🔥': 'ice_caller', '🔥🔥': 'flame_caller',
+      '💧🔥': 'river_caller', '🎵': 'dualchirps',
+      // Rare
+      '🦅': 'tribeak', '🌟': 'sprike', '🎃': 'jack_o_sprike', '🍲': 'hotpot', '🧸': 'plushkin',
+      '⚡': 'zing', '👤': 'shadowpuff', '🦑': 'squibble', '🔥🌟': 'flame_creater', '💧🌟': 'river_creater',
+      '🌲🌟': 'forest_creater', '☁️🌟': 'cloud_creater', '❄️🌟': 'ice_creater',
+      '🌸🪨': 'floraterra', '🌸🍬': 'florasweet', '🔥🪨': 'pyroterra', '⚡🌵': 'electrocacti',
+      '💧🥥': 'aquacoco', '🔥🍬': 'pyrosweet', '🌸🍄': 'floramush', '💧🫐': 'aquaberry', '⚡🐱': 'electrokitty',
+      // Heroic
+      '🦑🔥': 'squabble', '❄️🦣': 'shivertusk', '🐘': 'hebluff', '🦕': 'draboon',
+      '🌊': 'aquaster', '⭐': 'cosmoster',
+      '🔥🌵': 'pyrocacti', '🔥🐶': 'pyropuppy', '⚡🍬': 'electrosweet', '💧🍬': 'aquasweet',
+      '💧🪨': 'aquaterra', '⚡🪨': 'electroterra', '🌸🐶': 'florapuppy',
+      // Legendary
+      '❄️🔥': 'chill_and_char', '🌑': 'eclipse', '💥': 'drenchor', '✨': 'shimmer_storm',
+      '🦅🔥': 'serasoar', '❄️❄️': 'cryospike', '🧊': 'frozzra', '🦙': 'llavama', '✨🌟': 'luma',
+      '🌸': 'florafox', '🌟❄️': 'arcturus', '🔮': 'magmischief', '🌊🌟': 'tidus', '🔥🔥🔥': 'magmayhem',
+      '🌱': 'vegabloom', '🔥🌸': 'blazebloom', '⭐❄️': 'arcturion', '💪': 'barbarian', '🐊': 'aquadile',
+      '🦖': 'pyrodile', '❄️🔥🔥': 'shiver_and_scorch', '💧⚡': 'splash_and_spark', '🌊❄️': 'riptide',
+      '🐻❄️': 'polartide', '☀️': 'sunra', '🌙': 'luna', '🌌': 'nebula', '☀️☀️': 'solar',
+      '🍄': 'gryshroom', '🐙': 'gryphotopus', '✨✨': 'glimmering', '🐝': 'buzzra', '🌊🌊': 'hydroid',
+      '🪼': 'jellegant', '🐟': 'merhawk', '🌅': 'raygalaxy', '👻': 'shadowflash', '👑❄️': 'arctiqueen',
+      '💬': 'intitalk', '🌠': 'cerenox',
+      '🔪🐱': 'tacklekitty', '👨‍🌾🫐': 'farmerberry', '💧🐶': 'aquapuppy', '🔥🦊': 'pyroyeeti',
+      '⚡🦊': 'electroyeeti', '💧🦊': 'aquayeeti', '🪸🦊': 'coralyeeti', '🌋🪨': 'magmaterra',
+      '⚡🥥': 'shockcoco', '⚡🐶': 'electropuppy', '🌸🌵': 'flowcacti', '☀️🫐': 'solarberry',
+      '🌸🦊': 'florayeeti', '🤖🥬': 'veggiebot', '🔥🍄': 'embermush', '⚡🤖': 'electrobot',
+      '🍵🍬': 'matcha_sweet', '🌊🐱': 'tsunami_kitty',
+      // Supreme
+      '🚗': 'car', '🚙': 'suv', '🚕': 'taxi', '🚌': 'bus', '🤖': 'robot',
+      // Exclusive
+      '🐿️': 'hecker', '🐋': 'beluga', '🐹': 'hamster',
+      // Legendary (additional)
+      '🍞': 'bread'
+    };
+
+    const petHPByType = {
+      // Original
+      dog: 80, cat: 70, mouse: 50, fox: 75, bear: 120,
+      // Common
+      fidough: 65, quack: 60, squacks: 55, ice_neek: 70, forest_neek: 72,
+      flame_neek: 75, river_neek: 68, cloud_neek: 65,
+      florakitty: 72, pyrokitty: 78, aquakitty: 75, pyrococo: 85, floracoco: 82,
+      floracacti: 68, aquamush: 70, aquacacti: 72, pyroberry: 65, electromush: 73,
+      pyromush: 76, electroberry: 74, floraberry: 71,
+      // Uncommon
+      forest_caller: 85, cloud_caller: 80, ice_caller: 85, flame_caller: 90, 
+      river_caller: 82, dualchirps: 75,
+      // Rare
+      tribeak: 95, sprike: 100, jack_o_sprike: 105, hotpot: 90, plushkin: 85,
+      zing: 110, shadowpuff: 95, squibble: 92, flame_creater: 105, river_creater: 100,
+      forest_creater: 102, cloud_creater: 98, ice_creater: 103,
+      floraterra: 108, florasweet: 104, pyroterra: 112, electrocacti: 106,
+      aquacoco: 103, pyrosweet: 110, floramush: 102, aquaberry: 105, electrokitty: 108,
+      // Heroic
+      squabble: 130, shivertusk: 140, hebluff: 135, draboon: 145,
+      aquaster: 138, cosmoster: 150,
+      pyrocacti: 142, pyropuppy: 135, electrosweet: 138, aquasweet: 136,
+      aquaterra: 144, electroterra: 146, florapuppy: 132,
+      // Legendary
+      chill_and_char: 200, eclipse: 210, drenchor: 210, blast_star: 220, shimmer_storm: 215,
+      serasoar: 205, cryospike: 200, frozzra: 195, llavama: 185, luma: 190,
+      florafox: 188, arcturus: 210, magmischief: 205, tidus: 200, magmayhem: 215,
+      vegabloom: 192, blazebloom: 205, arcturion: 220, barbarian: 225, aquadile: 210,
+      pyrodile: 215, shiver_and_scorch: 240, splash_and_spark: 230, riptide: 220,
+      polartide: 225, sunra: 200, luna: 200, nebula: 210, solar: 215,
+      gryshroom: 195, gryphotopus: 205, glimmering: 215, buzzra: 190, hydroid: 210,
+      jellegant: 200, merhawk: 205, raygalaxy: 220, shadowflash: 215, arctiqueen: 240,
+      intitalk: 225, cerenox: 250,
+      tacklekitty: 235, farmerberry: 228, aquapuppy: 230, pyroyeeti: 245, electroyeeti: 242,
+      aquayeeti: 240, coralyeeti: 238, magmaterra: 235, shockcoco: 232, electropuppy: 228,
+      flowcacti: 225, solarberry: 230, florayeeti: 238, veggiebot: 242, embermush: 220,
+      electrobot: 240, matcha_sweet: 224, tsunami_kitty: 235,
+      // Supreme
+      car: 300, suv: 350, taxi: 280, bus: 400, robot: 500,
+      // Exclusive
+      hecker: 2000, beluga: 1000, hamster: 1500,
+      // Legendary (additional)
+      bread: 500
+    };
+
+    const petRarityByType = {
+      // Original common
+      dog: 'common', cat: 'common', mouse: 'common', fox: 'common', bear: 'common',
+      // Common
+      fidough: 'common', quack: 'common', squacks: 'common', ice_neek: 'common', forest_neek: 'common',
+      flame_neek: 'common', river_neek: 'common', cloud_neek: 'common',
+      florakitty: 'common', pyrokitty: 'common', aquakitty: 'common', pyrococo: 'common', floracoco: 'common',
+      floracacti: 'common', aquamush: 'common', aquacacti: 'common', pyroberry: 'common', electromush: 'common',
+      pyromush: 'common', electroberry: 'common', floraberry: 'common',
+      // Uncommon
+      forest_caller: 'uncommon', cloud_caller: 'uncommon', ice_caller: 'uncommon', flame_caller: 'uncommon',
+      river_caller: 'uncommon', dualchirps: 'uncommon',
+      // Rare
+      tribeak: 'rare', sprike: 'rare', jack_o_sprike: 'rare', hotpot: 'rare', plushkin: 'rare',
+      zing: 'rare', shadowpuff: 'rare', squibble: 'rare', flame_creater: 'rare', river_creater: 'rare',
+      forest_creater: 'rare', cloud_creater: 'rare', ice_creater: 'rare',
+      floraterra: 'rare', florasweet: 'rare', pyroterra: 'rare', electrocacti: 'rare',
+      aquacoco: 'rare', pyrosweet: 'rare', floramush: 'rare', aquaberry: 'rare', electrokitty: 'rare',
+      // Heroic
+      squabble: 'heroic', shivertusk: 'heroic', hebluff: 'heroic', draboon: 'heroic',
+      aquaster: 'heroic', cosmoster: 'heroic',
+      pyrocacti: 'heroic', pyropuppy: 'heroic', electrosweet: 'heroic', aquasweet: 'heroic',
+      aquaterra: 'heroic', electroterra: 'heroic', florapuppy: 'heroic',
+      // Legendary
+      chill_and_char: 'legendary', eclipse: 'legendary', drenchor: 'legendary', blast_star: 'legendary', shimmer_storm: 'legendary',
+      serasoar: 'legendary', cryospike: 'legendary', frozzra: 'legendary', llavama: 'legendary', luma: 'legendary',
+      florafox: 'legendary', arcturus: 'legendary', magmischief: 'legendary', tidus: 'legendary', magmayhem: 'legendary',
+      vegabloom: 'legendary', blazebloom: 'legendary', arcturion: 'legendary', barbarian: 'legendary', aquadile: 'legendary',
+      pyrodile: 'legendary', shiver_and_scorch: 'legendary', splash_and_spark: 'legendary', riptide: 'legendary',
+      polartide: 'legendary', sunra: 'legendary', luna: 'legendary', nebula: 'legendary', solar: 'legendary',
+      gryshroom: 'legendary', gryphotopus: 'legendary', glimmering: 'legendary', buzzra: 'legendary', hydroid: 'legendary',
+      jellegant: 'legendary', merhawk: 'legendary', raygalaxy: 'legendary', shadowflash: 'legendary', arctiqueen: 'legendary',
+      intitalk: 'legendary', cerenox: 'legendary',
+      tacklekitty: 'legendary', farmerberry: 'legendary', aquapuppy: 'legendary', pyroyeeti: 'legendary', electroyeeti: 'legendary',
+      aquayeeti: 'legendary', coralyeeti: 'legendary', magmaterra: 'legendary', shockcoco: 'legendary', electropuppy: 'legendary',
+      flowcacti: 'legendary', solarberry: 'legendary', florayeeti: 'legendary', veggiebot: 'legendary', embermush: 'legendary',
+      electrobot: 'legendary', matcha_sweet: 'legendary', tsunami_kitty: 'legendary',
+      // Supreme
+      car: 'supreme', suv: 'supreme', taxi: 'supreme', bus: 'supreme', robot: 'supreme',
+      // Exclusive
+      hecker: 'exclusive', bread: 'legendary', beluga: 'exclusive', hamster: 'exclusive'
+    };
+
+    const petNamesByType = {
+      // Original
+      dog: 'Good Boy', cat: 'Whiskers', mouse: 'Squeaky', fox: 'Firefox', bear: 'Grizzly',
+      // Common
+      fidough: 'Fidough', quack: 'Quack', squacks: 'Squacks', ice_neek: 'Ice Neek', forest_neek: 'Forest Neek',
+      flame_neek: 'Flame Neek', river_neek: 'River Neek', cloud_neek: 'Cloud Neek',
+      florakitty: 'Florakitty', pyrokitty: 'Pyrokitty', aquakitty: 'Aquakitty', pyrococo: 'Pyrococo', floracoco: 'Floracoco',
+      floracacti: 'Floracacti', aquamush: 'Aquamush', aquacacti: 'Aquacacti', pyroberry: 'Pyroberry', electromush: 'Electromush',
+      pyromush: 'Pyromush', electroberry: 'Electroberry', floraberry: 'Floraberry',
+      // Uncommon
+      forest_caller: 'Forest Caller', cloud_caller: 'Cloud Caller', ice_caller: 'Ice Caller', flame_caller: 'Flame Caller',
+      river_caller: 'River Caller', dualchirps: 'Dualchirps',
+      // Rare
+      tribeak: 'Tribeak', sprike: 'Sprike', jack_o_sprike: 'Jack O\'Sprike', hotpot: 'Hotpot', plushkin: 'Plushkin',
+      zing: 'Zing', shadowpuff: 'Shadowpuff', squibble: 'Squibble', flame_creater: 'Flame Creater', river_creater: 'River Creater',
+      forest_creater: 'Forest Creater', cloud_creater: 'Cloud Creater', ice_creater: 'Ice Creater',
+      floraterra: 'Floraterra', florasweet: 'Florasweet', pyroterra: 'Pyroterra', electrocacti: 'Electrocacti',
+      aquacoco: 'Aquacoco', pyrosweet: 'Pyrosweet', floramush: 'Floramush', aquaberry: 'Aquaberry', electrokitty: 'Electrokitty',
+      // Heroic
+      squabble: 'Squabble', shivertusk: 'Shivertusk', hebluff: 'Hebluff', draboon: 'Draboon',
+      aquaster: 'Aquaster', cosmoster: 'Cosmoster',
+      pyrocacti: 'Pyrocacti', pyropuppy: 'Pyropuppy', electrosweet: 'Electrosweet', aquasweet: 'Aquasweet',
+      aquaterra: 'Aquaterra', electroterra: 'Electroterra', florapuppy: 'Florapuppy',
+      // Legendary
+      chill_and_char: 'Chill & Char', eclipse: 'Eclipse', drenchor: 'Drenchor', blast_star: 'Blast Star', shimmer_storm: 'Shimmer Storm',
+      serasoar: 'Serasoar', cryospike: 'Cryospike', frozzra: 'Frozzra', llavama: 'Llavama', luma: 'Luma',
+      florafox: 'Florafox', arcturus: 'Arcturus', magmischief: 'Magmischief', tidus: 'Tidus', magmayhem: 'Magmayhem',
+      vegabloom: 'Vegabloom', blazebloom: 'Blazebloom', arcturion: 'Arcturion', barbarian: 'Barbarian', aquadile: 'Aquadile',
+      pyrodile: 'Pyrodile', shiver_and_scorch: 'Shiver & Scorch', splash_and_spark: 'Splash & Spark', riptide: 'Riptide',
+      polartide: 'Polartide', sunra: 'Sunra', luna: 'Luna', nebula: 'Nebula', solar: 'Solar',
+      gryshroom: 'Gryshroom', gryphotopus: 'Gryphotopus', glimmering: 'Glimmering', buzzra: 'Buzzra', hydroid: 'Hydroid',
+      jellegant: 'Jellegant', merhawk: 'Merhawk', raygalaxy: 'Raygalaxy', shadowflash: 'Shadowflash', arctiqueen: 'Arctiqueen',
+      intitalk: 'Intitalk', cerenox: 'Cerenox',
+      tacklekitty: 'Tacklekitty', farmerberry: 'Farmerberry', aquapuppy: 'Aquapuppy', pyroyeeti: 'Pyroyeeti', electroyeeti: 'Electroyeeti',
+      aquayeeti: 'Aquayeeti', coralyeeti: 'Coralyeeti', magmaterra: 'Magmaterra', shockcoco: 'Shockcoco', electropuppy: 'Electropuppy',
+      flowcacti: 'Flowcacti', solarberry: 'Solarberry', florayeeti: 'Florayeeti', veggiebot: 'Veggiebot', embermush: 'Embermush',
+      electrobot: 'Electrobot', matcha_sweet: 'Matcha Sweet', tsunami_kitty: 'Tsunami Kitty',
+      // Supreme
+      car: 'Speed Demon', suv: 'Tank', taxi: 'Yellow Flash', bus: 'Big Bertha', robot: 'Mecha Supreme',
+      // Exclusive
+      hecker: 'Hecker', bread: 'Bread Loaf', beluga: 'Beluga', hamster: 'Hammy'
+    };
+
+    const mysteryPets = ['🐶', '🐱', '🐭', '🦊', '🐻'];
+    const botPets = ['🚗', '🚙', '🚕', '🚌', '🤖'];
+
+    const roleHierarchy = {
+      'owner': 5,
+      'coowner': 4,
+      'admin': 3,
+      'mod': 2,
+      'gamer': 1,
+      'pawn': 0
+    };
+
+    function canModerate(moderatorRole, targetRole) {
+      return roleHierarchy[moderatorRole] > roleHierarchy[targetRole];
+    }
+
+    function hasModPerms(role) {
+      return roleHierarchy[role] >= 2;
+    }
+
+    const dataHandler = {
+      onDataChanged(data) {
+        allUsers = data.filter(d => d.type === 'user');
+        chatMessages = data.filter(d => d.type === 'chat' && !d.deletedBy);
+        tradeOffers = data.filter(d => d.type === 'trade');
+        mailMessages = data.filter(d => d.type === 'mail');
+        battleRecords = data.filter(d => d.type === 'battle');
+        
+        checkForMentions();
+        
+        if (currentUser) {
+          const updated = allUsers.find(u => u.id === currentUser.id);
+          if (updated) {
+            currentUser = updated;
+            updateUI();
+          }
+        }
+      }
+    };
+
+    async function initApp() {
+      try {
+        const initResult = await window.dataSdk.init(dataHandler);
+        
+        if (!initResult.isOk) {
+          showLoginMessage('App initialization failed. Please refresh.', 'error');
+          return;
+        }
+        
+        // Wait for initial data load
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        
+        const eeveeExists = allUsers.find(u => u.username && u.username.toLowerCase() === 'eevee67670');
+        
+        if (!eeveeExists) {
+          const eeveeAccount = {
+            id: 'eevee_owner_account',
+            type: 'user',
+            username: 'eevee67670',
+            password: 'eevee.eevee',
+            role: 'owner',
+            grade: '12',
+            coins: 999999,
+            xp: 0,
+            petSeeds: 999999,
+            legendaryPetSeeds: 999999,
+            ownedPets: '🐱,🐿️',
+            petRarities: 'exclusive,exclusive',
+            petLevels: '1,1',
+            petNames: 'Beluga,Hecker',
+            petCurrentHP: '1000,2000',
+            profilePicture: '👑',
+            friends: '',
+            blockedUsers: '',
+            inventory: '',
+            petLevelUpBooks: 0,
+            xpBoosts: 0,
+            createdAt: new Date().toISOString()
+          };
+          
+          const createResult = await window.dataSdk.create(eeveeAccount);
+          
+          if (createResult.isOk) {
+            // Immediately add to allUsers so login works right away
+            allUsers.push(eeveeAccount);
+            // Still wait a bit for backend sync
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+        }
+        
+        isInitialized = true;
+      } catch (error) {
+        showLoginMessage('Error loading app. Please refresh.', 'error');
+      }
+    }
+
+    function showNotification(text, isError = false) {
+      const existing = document.querySelector('.notification');
+      if (existing) existing.remove();
+
+      const notif = document.createElement('div');
+      notif.className = 'notification';
+      notif.style.background = isError ? '#e74c3c' : '#27ae60';
+      notif.textContent = text;
+      
+      document.body.appendChild(notif);
+      setTimeout(() => notif.remove(), 3000);
+    }
+
+    function showLoginMessage(text, type) {
+      const msg = document.getElementById('loginMessage');
+      msg.textContent = text;
+      msg.className = 'message ' + (type === 'error' ? 'error-message' : 'success-message');
+      msg.classList.remove('hidden');
+    }
+
+    function showRegisterMessage(text, type) {
+      const msg = document.getElementById('registerMessage');
+      msg.textContent = text;
+      msg.className = 'message ' + (type === 'error' ? 'error-message' : 'success-message');
+      msg.classList.remove('hidden');
+    }
+
+    function showRegister() {
+      document.getElementById('loginForm').classList.add('hidden');
+      document.getElementById('registerForm').classList.remove('hidden');
+    }
+
+    function showLogin() {
+      document.getElementById('registerForm').classList.add('hidden');
+      document.getElementById('loginForm').classList.remove('hidden');
+    }
+
+    async function handleRegister() {
+      const username = document.getElementById('newUsername').value.trim();
+      const password = document.getElementById('newPassword').value;
+      const grade = document.getElementById('gradeLevel').value;
+
+      if (!username || !password) {
+        showRegisterMessage('Please fill all fields', 'error');
+        return;
+      }
+
+      if (!isInitialized) {
+        showRegisterMessage('Loading... Please wait', 'error');
+        return;
+      }
+
+      const existing = allUsers.find(u => u.username.toLowerCase() === username.toLowerCase());
+      if (existing) {
+        showRegisterMessage('Username already taken', 'error');
+        return;
+      }
+
+      showRegisterMessage('Creating account...', 'success');
+
+      let userRole = 'pawn';
+      if (username.toLowerCase() === 'eevee67670') {
+        userRole = 'owner';
+      } else if (username.toLowerCase().includes('seth')) {
+        userRole = 'gamer';
+      }
+
+      const result = await window.dataSdk.create({
+        id: Date.now().toString(),
+        type: 'user',
+        username: username,
+        password: password,
+        role: userRole,
+        grade: grade,
+        coins: 100,
+        xp: 0,
+        petSeeds: 1,
+        legendaryPetSeeds: 0,
+        ownedPets: '',
+        petRarities: '',
+        petLevels: '',
+        petNames: '',
+        petCurrentHP: '',
+        profilePicture: userRole === 'gamer' ? '🎮' : '📚',
+        friends: '',
+        blockedUsers: '',
+        inventory: '',
+        bannedUntil: '',
+        bannedBy: '',
+        petLevelUpBooks: 0,
+        xpBoosts: 0,
+        createdAt: new Date().toISOString()
+      });
+
+      if (result.isOk) {
+        showRegisterMessage('Account created! Logging in...', 'success');
+        
+        // Wait for data to sync with multiple checks
+        let found = false;
+        for (let i = 0; i < 6; i++) {
+          await new Promise(resolve => setTimeout(resolve, 500));
+          const newUser = allUsers.find(u => u.username === username);
+          if (newUser) {
+            currentUser = newUser;
+            currentUser.isOnline = true;
+            currentUser.lastActive = new Date().toISOString();
+            await window.dataSdk.update(currentUser);
+            found = true;
+            setTimeout(() => showHomeScreen(), 500);
+            break;
+          }
+        }
+        
+        if (!found) {
+          showRegisterMessage('Account created but login failed. Try signing in manually.', 'error');
+        }
+      } else {
+        showRegisterMessage('Failed to create account', 'error');
+      }
+    }
+
+    async function handleLogin() {
+      const username = document.getElementById('usernameInput').value.trim();
+      const password = document.getElementById('passwordInput').value.trim();
+      const signInBtn = document.getElementById('btnSignIn');
+
+      if (!username || !password) {
+        showLoginMessage('Please enter username and password', 'error');
+        return;
+      }
+
+      // Check school hours and show field if needed
+      const isSchoolHours = checkSchoolHours();
+      if (isSchoolHours) {
+        const schoolPasswordInput = document.getElementById('schoolPasswordInput');
+        const schoolField = document.getElementById('schoolPasswordField');
+        
+        // Make sure field is visible
+        if (schoolField) {
+          schoolField.style.display = 'block';
+        }
+        
+        const enteredSchoolPassword = (schoolPasswordInput ? schoolPasswordInput.value.trim() : '');
+        
+        if (!enteredSchoolPassword || enteredSchoolPassword !== schoolPassword) {
+          showLoginMessage('School password required during school hours (6am-3pm)! Enter it above.', 'error');
+          return;
+        }
+      }
+
+      // Disable button and show loading state
+      signInBtn.disabled = true;
+      signInBtn.textContent = 'Checking...';
+      showLoginMessage('Searching for user...', 'success');
+
+      try {
+        // Force wait for complete initialization
+        if (!isInitialized) {
+          showLoginMessage('Initializing app...', 'success');
+          let waitTime = 0;
+          while (!isInitialized && waitTime < 30000) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            waitTime += 1000;
+          }
+          
+          if (!isInitialized) {
+            throw new Error('App failed to initialize');
+          }
+        }
+
+        // Multiple search attempts with increasing waits
+        const searchAttempts = [
+          { wait: 2000, label: 'First check' },
+          { wait: 3000, label: 'Second check' },
+          { wait: 5000, label: 'Third check' },
+          { wait: 4000, label: 'Fourth check' },
+          { wait: 6000, label: 'Fifth check' }
+        ];
+
+        for (const attempt of searchAttempts) {
+          await new Promise(resolve => setTimeout(resolve, attempt.wait));
+          
+          showLoginMessage(`Searching (${attempt.label})...`, 'success');
+          
+          // Force refresh of allUsers data by re-checking backend
+          const user = allUsers.find(u => 
+            u && u.username && u.password && 
+            u.type === 'user' &&
+            u.username.toLowerCase() === username.toLowerCase() && 
+            u.password === password
+          );
+          
+          if (user) {
+            showLoginMessage('Logging in...', 'success');
+            await handleLoginWithUser(user, signInBtn);
+            return;
+          }
+        }
+
+        showLoginMessage('❌ Wrong username or password', 'error');
+        signInBtn.disabled = false;
+        signInBtn.textContent = 'Sign In';
+      } catch (error) {
+        showLoginMessage('Login error: ' + (error.message || 'Unknown error'), 'error');
+        signInBtn.disabled = false;
+        signInBtn.textContent = 'Sign In';
+      }
+    }
+
+    async function handleLoginWithUser(user, signInBtn) {
+      try {
+        // Check if banned
+        if (user.bannedUntil && user.bannedUntil !== '') {
+          const bannedUntil = new Date(user.bannedUntil);
+          if (bannedUntil > new Date()) {
+            const timeLeft = Math.ceil((bannedUntil - new Date()) / 60000);
+            showLoginMessage(`⛔ You are banned for ${timeLeft} more minutes!`, 'error');
+            signInBtn.disabled = false;
+            signInBtn.textContent = 'Sign In';
+            return;
+          } else {
+            user.bannedUntil = '';
+            user.bannedBy = '';
+            await window.dataSdk.update(user);
+          }
+        }
+
+        signInBtn.textContent = 'Logging in...';
+        showLoginMessage('Logging in...', 'success');
+
+        currentUser = user;
+        currentUser.isOnline = true;
+        currentUser.lastActive = new Date().toISOString();
+        
+        const updateResult = await window.dataSdk.update(currentUser);
+        if (updateResult.isOk) {
+          setTimeout(() => showHomeScreen(), 500);
+        } else {
+          throw new Error('Failed to update user status');
+        }
+      } catch (error) {
+        showLoginMessage('Failed to complete login: ' + (error.message || 'Unknown error'), 'error');
+        signInBtn.disabled = false;
+        signInBtn.textContent = 'Sign In';
+      }
+    }
+
+    async function handleSignOut() {
+      if (currentUser) {
+        currentUser.isOnline = false;
+        currentUser.lastActive = new Date().toISOString();
+        await window.dataSdk.update(currentUser);
+      }
+      currentUser = null;
+      document.getElementById('mainApp').classList.add('hidden');
+      document.getElementById('loginScreen').classList.remove('hidden');
+      document.getElementById('usernameInput').value = '';
+      document.getElementById('passwordInput').value = '';
+      showLogin();
+    }
+
+    function showHomeScreen() {
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('mainApp').classList.remove('hidden');
+      updateUI();
+    }
+
+    function getRoleBadge(role) {
+      if (role === 'owner') return '<span class="role-badge role-owner">OWNER</span>';
+      if (role === 'coowner') return '<span class="role-badge role-coowner">CO-OWNER</span>';
+      if (role === 'admin') return '<span class="role-badge role-admin">ADMIN</span>';
+      if (role === 'mod') return '<span class="role-badge role-mod">MOD</span>';
+      if (role === 'gamer') return '<span class="role-badge role-gamer">GAMER</span>';
+      return '';
+    }
+
+    function updateUI() {
+      if (!currentUser) return;
+      
+      document.getElementById('currentUsername').textContent = currentUser.username;
+      document.getElementById('profilePic').textContent = currentUser.profilePicture || '📚';
+      document.getElementById('roleDisplay').innerHTML = getRoleBadge(currentUser.role);
+      
+      const isOwner = currentUser.role === 'owner';
+      const displayCoins = isOwner ? '∞' : (currentUser.coins || 0);
+      const displaySeeds = isOwner ? '∞' : (currentUser.petSeeds || 0);
+      document.getElementById('userCoins').textContent = displayCoins;
+      document.getElementById('userXP').textContent = currentUser.xp || 0;
+      
+      const globalSettingsBtn = document.getElementById('globalSettingsBtn');
+      if (globalSettingsBtn) {
+        globalSettingsBtn.style.display = isOwner ? 'block' : 'none';
+      }
+    }
+
+    function openProfileSettings() {
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      
+      const modalContent = document.createElement('div');
+      modalContent.className = 'modal';
+      
+      const title = document.createElement('h3');
+      title.textContent = 'Profile Settings';
+      modalContent.appendChild(title);
+      
+      const gradeSection = document.createElement('div');
+      gradeSection.innerHTML = `
+        <h4>Change Grade Level</h4>
+        <select id="newGrade" style="width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 6px; border: 2px solid #e0e0e0;">
+          <option value="1">1st Grade</option>
+          <option value="2">2nd Grade</option>
+          <option value="3">3rd Grade</option>
+          <option value="4">4th Grade</option>
+          <option value="5">5th Grade</option>
+          <option value="6">6th Grade</option>
+          <option value="7">7th Grade</option>
+          <option value="8">8th Grade</option>
+          <option value="9">9th Grade</option>
+          <option value="10">10th Grade</option>
+          <option value="11">11th Grade</option>
+          <option value="12">12th Grade</option>
+        </select>
+      `;
+      modalContent.appendChild(gradeSection);
+      
+      setTimeout(() => {
+        const gradeSelect = document.getElementById('newGrade');
+        if (gradeSelect) {
+          gradeSelect.value = currentUser.grade || '1';
+        }
+      }, 0);
+      
+      const saveBtn = document.createElement('button');
+      saveBtn.className = 'btn';
+      saveBtn.textContent = 'Save Grade';
+      saveBtn.onclick = async () => {
+        const newGrade = document.getElementById('newGrade').value;
+        currentUser.grade = newGrade;
+        await window.dataSdk.update(currentUser);
+        showNotification('Grade updated!');
+        modal.remove();
+      };
+      modalContent.appendChild(saveBtn);
+      
+      const passwordSection = document.createElement('div');
+      passwordSection.style.marginTop = '20px';
+      passwordSection.style.paddingTop = '15px';
+      passwordSection.style.borderTop = '1px solid #e0e0e0';
+      
+      const passwordTitle = document.createElement('h4');
+      passwordTitle.textContent = 'Change Your Password';
+      passwordSection.appendChild(passwordTitle);
+      
+      const newPasswordLabel = document.createElement('label');
+      newPasswordLabel.textContent = 'New Password:';
+      newPasswordLabel.style.display = 'block';
+      newPasswordLabel.style.marginBottom = '5px';
+      newPasswordLabel.style.fontWeight = '600';
+      passwordSection.appendChild(newPasswordLabel);
+      
+      const newPasswordInput = document.createElement('input');
+      newPasswordInput.type = 'password';
+      newPasswordInput.id = 'newPassword';
+      newPasswordInput.placeholder = 'Enter new password';
+      newPasswordInput.style.width = '100%';
+      newPasswordInput.style.padding = '10px';
+      newPasswordInput.style.marginBottom = '10px';
+      newPasswordInput.style.borderRadius = '6px';
+      newPasswordInput.style.border = '2px solid #e0e0e0';
+      newPasswordInput.style.boxSizing = 'border-box';
+      passwordSection.appendChild(newPasswordInput);
+      
+      const changePasswordBtn = document.createElement('button');
+      changePasswordBtn.className = 'btn btn-secondary';
+      changePasswordBtn.textContent = 'Change Password';
+      changePasswordBtn.onclick = async () => {
+        const newPass = document.getElementById('newPassword').value.trim();
+        if (!newPass) {
+          showNotification('Enter a new password!', true);
+          return;
+        }
+        currentUser.password = newPass;
+        await window.dataSdk.update(currentUser);
+        showNotification('Password updated!');
+        modal.remove();
+      };
+      passwordSection.appendChild(changePasswordBtn);
+      
+      modalContent.appendChild(passwordSection);
+      
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'btn btn-secondary';
+      closeBtn.textContent = 'Close';
+      closeBtn.style.marginTop = '15px';
+      closeBtn.onclick = () => modal.remove();
+      modalContent.appendChild(closeBtn);
+      
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+    }
+
+    function openChat() {
+      document.getElementById('currentScreenTitle').textContent = '💬 Chat';
+      unreadMentions = 0;
+      updateMentionBadge();
+      const content = document.getElementById('mainContent');
+      content.innerHTML = '';
+      
+      const container = document.createElement('div');
+      container.className = 'chat-container';
+      container.style.height = '100%';
+      
+      const messagesDiv = document.createElement('div');
+      messagesDiv.className = 'chat-messages';
+      messagesDiv.id = 'chatMessages';
+      
+      const userMessages = chatMessages.filter(m => !m.deletedBy);
+      userMessages.forEach(msg => {
+        const sender = allUsers.find(u => u.id === msg.userId);
+        if (!sender) return;
+        
+        const msgDiv = document.createElement('div');
+        msgDiv.className = 'chat-message ' + (msg.userId === currentUser.id ? 'user' : 'bot');
+        
+        const profilePic = document.createElement('div');
+        profilePic.className = 'profile-pic';
+        profilePic.textContent = sender.profilePicture || '📚';
+        
+        const messageContent = document.createElement('div');
+        messageContent.className = 'message-content';
+        
+        const username = document.createElement('div');
+        username.className = 'username';
+        username.innerHTML = sender.username + getRoleBadge(sender.role);
+        messageContent.appendChild(username);
+        
+        const text = document.createElement('div');
+        let messageHTML = msg.message;
+        if (messageHTML.includes(`@${currentUser.username}`)) {
+          messageHTML = messageHTML.replace(
+            `@${currentUser.username}`,
+            `<span style="background: #ffeb3b; color: #333; padding: 2px 4px; border-radius: 3px; font-weight: bold;">@${currentUser.username}</span>`
+          );
+        }
+        text.innerHTML = messageHTML;
+        messageContent.appendChild(text);
+        
+        msgDiv.appendChild(profilePic);
+        msgDiv.appendChild(messageContent);
+        
+        if (currentUser.role === 'owner') {
+          const deleteBtn = document.createElement('button');
+          deleteBtn.className = 'delete-btn';
+          deleteBtn.textContent = '🗑️';
+          deleteBtn.onclick = async () => {
+            msg.deletedBy = currentUser.id;
+            await window.dataSdk.update(msg);
+            openChat();
+          };
+          msgDiv.appendChild(deleteBtn);
+        }
+        
+        messagesDiv.appendChild(msgDiv);
+      });
+      
+      container.appendChild(messagesDiv);
+      
+      const inputArea = document.createElement('div');
+      inputArea.className = 'chat-input-area';
+      inputArea.innerHTML = `
+        <input type="text" id="chatInput" placeholder="Type your message...">
+        <button class="btn-small" type="button" onclick="sendChatMessage()">Send</button>
+      `;
+      container.appendChild(inputArea);
+      
+      content.appendChild(container);
+      
+      const chatInput = document.getElementById('chatInput');
+      if (chatInput) {
+        chatInput.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            sendChatMessage();
+          }
+        });
+      }
+      
+      setTimeout(() => {
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      }, 100);
+    }
+
+    async function sendChatMessage() {
+      const input = document.getElementById('chatInput');
+      const message = input.value.trim();
+      
+      if (!message) return;
+      
+      await window.dataSdk.create({
+        id: Date.now().toString(),
+        type: 'chat',
+        userId: currentUser.id,
+        username: currentUser.username,
+        message: message,
+        timestamp: new Date().toISOString()
+      });
+      
+      input.value = '';
+      openChat();
+    }
+
+    function openMath() {
+      document.getElementById('currentScreenTitle').textContent = '➗ Math Help';
+      const content = document.getElementById('mainContent');
+      content.innerHTML = '';
+      
+      const container = document.createElement('div');
+      
+      const title = document.createElement('h2');
+      title.textContent = '➗ Math Problem Solver';
+      title.style.marginBottom = '20px';
+      container.appendChild(title);
+      
+      const problemDiv = document.createElement('div');
+      problemDiv.style.background = '#f5f5f5';
+      problemDiv.style.padding = '20px';
+      problemDiv.style.borderRadius = '10px';
+      problemDiv.style.marginBottom = '20px';
+      
+      const num1 = Math.floor(Math.random() * 50) + 1;
+      const num2 = Math.floor(Math.random() * 50) + 1;
+      const operations = ['+', '-', '*'];
+      const operation = operations[Math.floor(Math.random() * operations.length)];
+      
+      let answer;
+      if (operation === '+') answer = num1 + num2;
+      else if (operation === '-') answer = num1 - num2;
+      else answer = num1 * num2;
+      
+      problemDiv.innerHTML = `
+        <h3 style="text-align: center; font-size: 32px; margin: 20px 0;">${num1} ${operation} ${num2} = ?</h3>
+        <input type="number" id="mathAnswer" placeholder="Your answer" style="width: 100%; padding: 12px; font-size: 18px; border: 2px solid #667eea; border-radius: 8px; box-sizing: border-box; margin-bottom: 15px;">
+        <button class="btn" type="button" onclick="checkMathAnswer(${answer})">Check Answer</button>
+        <div id="mathResult" style="margin-top: 15px; text-align: center; font-weight: bold;"></div>
+      `;
+      
+      container.appendChild(problemDiv);
+      
+      const generateBtn = document.createElement('button');
+      generateBtn.className = 'btn btn-secondary';
+      generateBtn.textContent = '🔄 New Problem';
+      generateBtn.onclick = openMath;
+      container.appendChild(generateBtn);
+      
+      content.appendChild(container);
+    }
+
+    async function checkMathAnswer(correctAnswer) {
+      const userAnswer = parseInt(document.getElementById('mathAnswer').value);
+      const result = document.getElementById('mathResult');
+      
+      if (isNaN(userAnswer)) {
+        result.textContent = 'Please enter a number!';
+        result.style.color = '#e74c3c';
+        return;
+      }
+      
+      if (userAnswer === correctAnswer) {
+        result.textContent = '🎉 Correct! Great job!';
+        result.style.color = '#27ae60';
+        
+        const xpGain = 10;
+        const coinGain = 5;
+        
+        currentUser.xp = (currentUser.xp || 0) + xpGain;
+        if (currentUser.role !== 'owner') {
+          currentUser.coins = (currentUser.coins || 0) + coinGain;
+        }
+        
+        await window.dataSdk.update(currentUser);
+        updateUI();
+        showNotification(`+${xpGain} XP, +${coinGain} coins!`);
+      } else {
+        result.textContent = `❌ Not quite. The answer is ${correctAnswer}`;
+        result.style.color = '#e74c3c';
+      }
+    }
+
+    function openBattles() {
+      document.getElementById('currentScreenTitle').textContent = '⚔️ Pet Battles';
+      const content = document.getElementById('mainContent');
+      content.innerHTML = '';
+      
+      const container = document.createElement('div');
+      
+      const title = document.createElement('h2');
+      title.textContent = '⚔️ Battle Arena';
+      title.style.marginBottom = '20px';
+      container.appendChild(title);
+      
+      if (!currentUser.ownedPets || currentUser.ownedPets === '') {
+        const info = document.createElement('div');
+        info.className = 'message info-message';
+        info.textContent = 'No pets to battle! Get pets from the shop.';
+        container.appendChild(info);
+        content.appendChild(container);
+        return;
+      }
+      
+      const info = document.createElement('div');
+      info.className = 'message info-message';
+      info.innerHTML = '<strong>Select your pet and battle bot opponents!</strong>';
+      container.appendChild(info);
+      
+      const battleBtn = document.createElement('button');
+      battleBtn.className = 'btn';
+      battleBtn.textContent = '⚔️ Start Battle';
+      battleBtn.onclick = startBattle;
+      container.appendChild(battleBtn);
+      
+      content.appendChild(container);
+    }
+
+    function startBattle() {
+      const pets = currentUser.ownedPets.split(',');
+      const levels = currentUser.petLevels.split(',');
+      const names = currentUser.petNames.split(',');
+      const hps = currentUser.petCurrentHP.split(',');
+      
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      
+      const modalContent = document.createElement('div');
+      modalContent.className = 'modal';
+      
+      const title = document.createElement('h3');
+      title.textContent = 'Select Your Battle Pet';
+      modalContent.appendChild(title);
+      
+      pets.forEach((pet, index) => {
+        const petDiv = document.createElement('div');
+        petDiv.className = 'pet-slot';
+        petDiv.innerHTML = `
+          <div style="font-size: 32px; text-align: center;">${pet}</div>
+          <div style="text-align: center;"><strong>${names[index]}</strong> Lv.${levels[index]}</div>
+          <div style="text-align: center;">HP: ${hps[index]}</div>
+        `;
+        petDiv.onclick = () => {
+          modal.remove();
+          executeBattle(index);
+        };
+        modalContent.appendChild(petDiv);
+      });
+      
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'btn btn-secondary';
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.style.marginTop = '15px';
+      cancelBtn.onclick = () => modal.remove();
+      modalContent.appendChild(cancelBtn);
+      
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+    }
+
+    async function executeBattle(playerPetIndex) {
+      const pets = currentUser.ownedPets.split(',');
+      const levels = currentUser.petLevels.split(',');
+      const names = currentUser.petNames.split(',');
+      const hps = currentUser.petCurrentHP.split(',');
+      
+      const playerPet = pets[playerPetIndex];
+      const playerLevel = parseInt(levels[playerPetIndex]);
+      const playerName = names[playerPetIndex];
+      const playerHP = parseInt(hps[playerPetIndex]);
+      
+      const allAvailablePets = Object.keys(petTypes);
+      const botPet = allAvailablePets[Math.floor(Math.random() * allAvailablePets.length)];
+      const botLevel = Math.max(1, playerLevel + Math.floor(Math.random() * 3) - 1);
+      const botType = petTypes[botPet];
+      const botHP = petHPByType[botType] + (botLevel - 1) * 50;
+      
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      
+      const modalContent = document.createElement('div');
+      modalContent.className = 'modal';
+      modalContent.style.textAlign = 'center';
+      
+      const battleGrid = document.createElement('div');
+      battleGrid.style.display = 'grid';
+      battleGrid.style.gridTemplateColumns = '1fr 1fr';
+      battleGrid.style.gap = '20px';
+      battleGrid.style.margin = '20px 0';
+      
+      const playerSection = document.createElement('div');
+      playerSection.innerHTML = `
+        <div style="font-size: 48px;">${playerPet}</div>
+        <strong>${playerName}</strong><br>
+        Level ${playerLevel}<br>
+        HP: <span id="playerHP">${playerHP}</span>
+      `;
+      battleGrid.appendChild(playerSection);
+      
+      const botSection = document.createElement('div');
+      botSection.innerHTML = `
+        <div style="font-size: 48px;">${botPet}</div>
+        <strong>Bot ${botType}</strong><br>
+        Level <span id="battleBotLevel">${botLevel}</span><br>
+        HP: <span id="botHP">${botHP}</span>
+      `;
+      battleGrid.appendChild(botSection);
+      
+      const title = document.createElement('h3');
+      title.textContent = '⚔️ Battle!';
+      
+      modalContent.innerHTML = '';
+      modalContent.appendChild(title);
+      modalContent.appendChild(battleGrid);
+      
+      const battleLog = document.createElement('div');
+      battleLog.id = 'battleLog';
+      battleLog.style.background = '#f0f0f0';
+      battleLog.style.padding = '15px';
+      battleLog.style.borderRadius = '8px';
+      battleLog.style.maxHeight = '200px';
+      battleLog.style.overflowY = 'auto';
+      battleLog.style.margin = '15px 0';
+      battleLog.style.textAlign = 'left';
+      modalContent.appendChild(battleLog);
+      
+      const battleControls = document.createElement('div');
+      battleControls.id = 'battleControls';
+      battleControls.style.display = 'flex';
+      battleControls.style.gap = '10px';
+      battleControls.style.justifyContent = 'center';
+      battleControls.style.flexWrap = 'wrap';
+      modalContent.appendChild(battleControls);
+      
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+      
+      let currentPlayerHP = playerHP;
+      let currentBotHP = botHP;
+      let currentBotLevel = botLevel;
+      
+      const battleLogDiv = document.getElementById('battleLog');
+      
+      const battleControlsDiv = document.getElementById('battleControls');
+      
+      const attackBtn = document.createElement('button');
+      attackBtn.className = 'btn';
+      attackBtn.type = 'button';
+      attackBtn.textContent = '⚔️ Attack!';
+      battleControlsDiv.appendChild(attackBtn);
+      
+      const exitBtn = document.createElement('button');
+      exitBtn.className = 'btn btn-warning';
+      exitBtn.type = 'button';
+      exitBtn.textContent = '🚪 Exit Battle';
+      exitBtn.onclick = () => {
+        modal.remove();
+        openBattles();
+      };
+      battleControlsDiv.appendChild(exitBtn);
+      
+      let hackerMenuBtn = null;
+      if (currentUser.role === 'owner') {
+        hackerMenuBtn = document.createElement('button');
+        hackerMenuBtn.className = 'btn btn-secondary';
+        hackerMenuBtn.type = 'button';
+        hackerMenuBtn.textContent = '💻 Owner Menu';
+        hackerMenuBtn.onclick = () => {
+          const hackerModal = document.createElement('div');
+          hackerModal.className = 'modal-overlay';
+          
+          const hackerContent = document.createElement('div');
+          hackerContent.className = 'modal';
+          
+          const title = document.createElement('h3');
+          title.innerHTML = '💻 HACKER MODE - Owner Only';
+          title.style.color = '#00ffff';
+          hackerContent.appendChild(title);
+          
+          const btn1 = document.createElement('button');
+          btn1.className = 'btn btn-danger';
+          btn1.type = 'button';
+          btn1.textContent = '💥 Infinite Damage';
+          btn1.onclick = async () => {
+            currentBotHP = 0;
+            document.getElementById('botHP').textContent = '0';
+            
+            const log = document.createElement('div');
+            log.textContent = `${playerName} HACKS: INFINITE DAMAGE ACTIVATED!!! 💻⚡💥`;
+            log.style.color = '#ff0000';
+            log.style.fontWeight = 'bold';
+            log.style.textShadow = '0 0 10px #ff0000';
+            battleLogDiv.appendChild(log);
+            
+            await new Promise(resolve => setTimeout(resolve, 800));
+            
+            const winLog = document.createElement('div');
+            winLog.textContent = '🎉 You won via hack!';
+            winLog.style.color = '#f39c12';
+            winLog.style.fontWeight = 'bold';
+            battleLogDiv.appendChild(winLog);
+            
+            const xpGain = 25 + currentBotLevel * 5;
+            currentUser.xp = (currentUser.xp || 0) + xpGain;
+            await window.dataSdk.update(currentUser);
+            updateUI();
+            showNotification(`Hacked! +${xpGain} XP!`);
+            
+            attackBtn.disabled = true;
+            exitBtn.disabled = true;
+            if (hackerMenuBtn) {
+              hackerMenuBtn.disabled = true;
+            }
+            setTimeout(() => {
+              if (modal && modal.parentNode) {
+                modal.remove();
+              }
+              openBattles();
+            }, 2000);
+            hackerModal.remove();
+          };
+          hackerContent.appendChild(btn1);
+          
+          const btn2 = document.createElement('button');
+          btn2.className = 'btn btn-danger';
+          btn2.type = 'button';
+          btn2.textContent = '⚙️ Set Opponent Level';
+          btn2.onclick = () => {
+            hackerModal.remove();
+            
+            const levelModal = document.createElement('div');
+            levelModal.className = 'modal-overlay';
+            
+            const levelContent = document.createElement('div');
+            levelContent.className = 'modal';
+            
+            const levelTitle = document.createElement('h3');
+            levelTitle.innerHTML = '⚙️ Set Opponent Level';
+            levelTitle.style.color = '#00ffff';
+            levelContent.appendChild(levelTitle);
+            
+            const levelLabel = document.createElement('label');
+            levelLabel.textContent = 'Enter opponent level (1-999):';
+            levelLabel.style.display = 'block';
+            levelLabel.style.marginBottom = '10px';
+            levelLabel.style.fontWeight = '600';
+            levelContent.appendChild(levelLabel);
+            
+            const levelInput = document.createElement('input');
+            levelInput.type = 'number';
+            levelInput.min = '1';
+            levelInput.max = '999';
+            levelInput.placeholder = 'Enter level value';
+            levelInput.style.width = '100%';
+            levelInput.style.padding = '10px';
+            levelInput.style.marginBottom = '15px';
+            levelInput.style.borderRadius = '6px';
+            levelInput.style.border = '2px solid #00ffff';
+            levelInput.style.boxSizing = 'border-box';
+            levelContent.appendChild(levelInput);
+            
+            const levelSetBtn = document.createElement('button');
+            levelSetBtn.className = 'btn btn-danger';
+            levelSetBtn.type = 'button';
+            levelSetBtn.textContent = 'Set Level';
+            levelSetBtn.onclick = () => {
+              const newLevel = parseInt(levelInput.value);
+              
+              if (!isNaN(newLevel) && newLevel >= 1 && newLevel <= 999) {
+                currentBotLevel = newLevel;
+                document.getElementById('battleBotLevel').textContent = newLevel;
+                
+                const log = document.createElement('div');
+                log.textContent = `${playerName} HACKS: Set opponent level to ${newLevel}! 💻⚙️`;
+                log.style.color = '#00ffff';
+                log.style.fontWeight = 'bold';
+                battleLogDiv.appendChild(log);
+                
+                showNotification(`Hacked: Level set to ${newLevel}!`);
+                levelModal.remove();
+              } else {
+                showNotification('Invalid level value (1-999)!', true);
+              }
+            };
+            levelContent.appendChild(levelSetBtn);
+            
+            const levelCancelBtn = document.createElement('button');
+            levelCancelBtn.className = 'btn btn-secondary';
+            levelCancelBtn.type = 'button';
+            levelCancelBtn.textContent = 'Cancel';
+            levelCancelBtn.onclick = () => levelModal.remove();
+            levelContent.appendChild(levelCancelBtn);
+            
+            levelModal.appendChild(levelContent);
+            document.body.appendChild(levelModal);
+          };
+          hackerContent.appendChild(btn2);
+          
+          const btn3 = document.createElement('button');
+          btn3.className = 'btn btn-danger';
+          btn3.type = 'button';
+          btn3.textContent = '🎲 Random Outcome';
+          btn3.onclick = async () => {
+            const outcomes = [
+              { win: true, damage: 0, message: 'RANDOM HACK: Victory Guaranteed! 🎰' },
+              { win: false, damage: 999999, message: 'RANDOM HACK: Defeat Simulation! 💀' },
+              { win: true, damage: Math.floor(Math.random() * 100) + 50, message: 'RANDOM HACK: Critical Strike! ⚡' }
+            ];
+            const outcome = outcomes[Math.floor(Math.random() * outcomes.length)];
+            
+            const log = document.createElement('div');
+            log.textContent = `${playerName} ${outcome.message}`;
+            log.style.color = '#ff00ff';
+            log.style.fontWeight = 'bold';
+            log.style.textShadow = '0 0 15px #ff00ff';
+            battleLogDiv.appendChild(log);
+            
+            if (outcome.win) {
+              currentBotHP = 0;
+              document.getElementById('botHP').textContent = '0';
+              await new Promise(resolve => setTimeout(resolve, 500));
+              const xpGain = 25 + currentBotLevel * 5;
+              currentUser.xp = (currentUser.xp || 0) + xpGain;
+              await window.dataSdk.update(currentUser);
+              updateUI();
+              showNotification(`Hacked! +${xpGain} XP!`);
+              attackBtn.disabled = true;
+              exitBtn.disabled = true;
+              if (hackerMenuBtn) hackerMenuBtn.disabled = true;
+              setTimeout(() => {
+                if (modal && modal.parentNode) modal.remove();
+                openBattles();
+              }, 2000);
+            } else {
+              currentPlayerHP -= outcome.damage;
+              document.getElementById('playerHP').textContent = Math.max(0, currentPlayerHP);
+              showNotification('Hacked! You took massive damage!', true);
+              if (currentPlayerHP <= 0) {
+                const loseLog = document.createElement('div');
+                loseLog.textContent = '💔 Hack backfired!';
+                loseLog.style.color = '#e74c3c';
+                loseLog.style.fontWeight = 'bold';
+                battleLogDiv.appendChild(loseLog);
+                attackBtn.disabled = true;
+              }
+            }
+            hackerModal.remove();
+          };
+          hackerContent.appendChild(btn3);
+          
+          const btn4 = document.createElement('button');
+          btn4.className = 'btn btn-danger';
+          btn4.type = 'button';
+          btn4.textContent = '🔄 Switch Opponent Pet';
+          btn4.onclick = () => {
+            hackerModal.remove();
+            const petModal = document.createElement('div');
+            petModal.className = 'modal-overlay';
+            const petContent = document.createElement('div');
+            petContent.className = 'modal';
+            const petTitle = document.createElement('h3');
+            petTitle.innerHTML = '🔄 Switch Opponent Pet';
+            petTitle.style.color = '#00ffff';
+            petContent.appendChild(petTitle);
+            
+            const allAvailablePets = Object.keys(petTypes);
+            allAvailablePets.forEach(petEmoji => {
+              const petType = petTypes[petEmoji];
+              const petBtn = document.createElement('button');
+              petBtn.className = 'btn btn-danger';
+              petBtn.type = 'button';
+              petBtn.textContent = `${petEmoji} ${petNamesByType[petType]}`;
+              petBtn.onclick = () => {
+                botPet = petEmoji;
+                const newBotType = petTypes[botPet];
+                botSection.innerHTML = `
+                  <div style="font-size: 48px;">${botPet}</div>
+                  <strong>Bot ${newBotType}</strong><br>
+                  Level <span id="battleBotLevel">${currentBotLevel}</span><br>
+                  HP: <span id="botHP">${currentBotHP}</span>
+                `;
+                
+                const switchLog = document.createElement('div');
+                switchLog.textContent = `${playerName} HACKS: Switched opponent to ${petNamesByType[newBotType]}! 🔄`;
+                switchLog.style.color = '#00ffff';
+                switchLog.style.fontWeight = 'bold';
+                battleLogDiv.appendChild(switchLog);
+                
+                showNotification(`Hacked: Opponent is now ${petNamesByType[newBotType]}!`);
+                petModal.remove();
+              };
+              petContent.appendChild(petBtn);
+            });
+            
+            const petCancelBtn = document.createElement('button');
+            petCancelBtn.className = 'btn btn-secondary';
+            petCancelBtn.type = 'button';
+            petCancelBtn.textContent = 'Cancel';
+            petCancelBtn.onclick = () => petModal.remove();
+            petContent.appendChild(petCancelBtn);
+            
+            petModal.appendChild(petContent);
+            document.body.appendChild(petModal);
+          };
+          hackerContent.appendChild(btn4);
+          
+          const btn5 = document.createElement('button');
+          btn5.className = 'btn btn-danger';
+          btn5.type = 'button';
+          btn5.textContent = '❤️ Set Opponent HP';
+          btn5.onclick = () => {
+            hackerModal.remove();
+            const hpModal = document.createElement('div');
+            hpModal.className = 'modal-overlay';
+            const hpContent = document.createElement('div');
+            hpContent.className = 'modal';
+            const hpTitle = document.createElement('h3');
+            hpTitle.innerHTML = '❤️ Set Opponent HP';
+            hpTitle.style.color = '#00ffff';
+            hpContent.appendChild(hpTitle);
+            
+            const hpLabel = document.createElement('label');
+            hpLabel.textContent = 'Enter opponent HP:';
+            hpLabel.style.display = 'block';
+            hpLabel.style.marginBottom = '10px';
+            hpLabel.style.fontWeight = '600';
+            hpContent.appendChild(hpLabel);
+            
+            const hpInput = document.createElement('input');
+            hpInput.type = 'number';
+            hpInput.min = '0';
+            hpInput.placeholder = 'Enter HP value';
+            hpInput.style.width = '100%';
+            hpInput.style.padding = '10px';
+            hpInput.style.marginBottom = '15px';
+            hpInput.style.borderRadius = '6px';
+            hpInput.style.border = '2px solid #00ffff';
+            hpInput.style.boxSizing = 'border-box';
+            hpContent.appendChild(hpInput);
+            
+            const hpSetBtn = document.createElement('button');
+            hpSetBtn.className = 'btn btn-danger';
+            hpSetBtn.type = 'button';
+            hpSetBtn.textContent = 'Set HP';
+            hpSetBtn.onclick = () => {
+              const newHP = parseInt(hpInput.value);
+              
+              if (!isNaN(newHP) && newHP >= 0) {
+                currentBotHP = newHP;
+                document.getElementById('botHP').textContent = newHP;
+                
+                const log = document.createElement('div');
+                log.textContent = `${playerName} HACKS: Set opponent HP to ${newHP}! 💻❤️`;
+                log.style.color = '#00ffff';
+                log.style.fontWeight = 'bold';
+                battleLogDiv.appendChild(log);
+                
+                showNotification(`Hacked: Opponent HP set to ${newHP}!`);
+                hpModal.remove();
+              } else {
+                showNotification('Invalid HP value!', true);
+              }
+            };
+            hpContent.appendChild(hpSetBtn);
+            
+            const hpCancelBtn = document.createElement('button');
+            hpCancelBtn.className = 'btn btn-secondary';
+            hpCancelBtn.type = 'button';
+            hpCancelBtn.textContent = 'Cancel';
+            hpCancelBtn.onclick = () => hpModal.remove();
+            hpContent.appendChild(hpCancelBtn);
+            
+            hpModal.appendChild(hpContent);
+            document.body.appendChild(hpModal);
+          };
+          hackerContent.appendChild(btn5);
+          
+          const btn6 = document.createElement('button');
+          btn6.className = 'btn btn-danger';
+          btn6.type = 'button';
+          btn6.textContent = '1️⃣ Set to 1 HP';
+          btn6.onclick = async () => {
+            currentBotHP = 1;
+            document.getElementById('botHP').textContent = '1';
+            
+            const log = document.createElement('div');
+            log.textContent = `${playerName} HACKS: Set opponent to 1 HP! 1️⃣`;
+            log.style.color = '#ff6600';
+            log.style.fontWeight = 'bold';
+            battleLogDiv.appendChild(log);
+            
+            showNotification('Hacked: Opponent at 1 HP!');
+            hackerModal.remove();
+          };
+          hackerContent.appendChild(btn6);
+          
+          const closeBtn = document.createElement('button');
+          closeBtn.className = 'btn btn-secondary';
+          closeBtn.type = 'button';
+          closeBtn.textContent = 'Close';
+          closeBtn.style.marginTop = '15px';
+          closeBtn.onclick = () => hackerModal.remove();
+          hackerContent.appendChild(closeBtn);
+          
+          hackerModal.appendChild(hackerContent);
+          document.body.appendChild(hackerModal);
+        };
+        battleControlsDiv.appendChild(hackerMenuBtn);
+      }
+      
+      attackBtn.onclick = async () => {
+        const playerDamage = Math.floor(Math.random() * 30) + playerLevel * 10;
+        
+        let isHeckerHack = false;
+        if (playerPet === '🐿️' && Math.random() < 0.3) {
+          isHeckerHack = true;
+        }
+        
+        const finalPlayerDamage = isHeckerHack ? playerDamage * 5 : playerDamage;
+        currentBotHP -= finalPlayerDamage;
+        
+        const log1 = document.createElement('div');
+        log1.textContent = isHeckerHack 
+          ? `${playerName} HACKS for ${finalPlayerDamage} damage! 💻⚡` 
+          : `${playerName} deals ${finalPlayerDamage} damage!`;
+        log1.style.color = isHeckerHack ? '#00ffff' : '#27ae60';
+        log1.style.fontWeight = isHeckerHack ? 'bold' : 'normal';
+        battleLogDiv.appendChild(log1);
+        
+        document.getElementById('botHP').textContent = Math.max(0, currentBotHP);
+        
+        if (currentBotHP <= 0) {
+          const winLog = document.createElement('div');
+          winLog.textContent = '🎉 You won!';
+          winLog.style.color = '#f39c12';
+          winLog.style.fontWeight = 'bold';
+          battleLogDiv.appendChild(winLog);
+          
+          const xpGain = 25 + currentBotLevel * 5;
+          const coinGain = 20 + currentBotLevel * 3;
+          
+          currentUser.xp = (currentUser.xp || 0) + xpGain;
+          if (currentUser.role !== 'owner') {
+            currentUser.coins = (currentUser.coins || 0) + coinGain;
+          }
+          
+          await window.dataSdk.update(currentUser);
+          updateUI();
+          
+          showNotification(`Won! +${xpGain} XP, +${coinGain} coins!`);
+          
+          attackBtn.disabled = true;
+          exitBtn.disabled = true;
+          if (currentUser.role === 'owner' && hackerMenuBtn) {
+            hackerMenuBtn.disabled = true;
+          }
+          setTimeout(() => {
+            if (modal && modal.parentNode) {
+              modal.remove();
+            }
+            openBattles();
+          }, 2000);
+          return;
+        }
+        
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        const botDamage = Math.floor(Math.random() * 30) + currentBotLevel * 10;
+        currentPlayerHP -= botDamage;
+        
+        const log2 = document.createElement('div');
+        log2.textContent = `Bot deals ${botDamage} damage!`;
+        log2.style.color = '#e74c3c';
+        battleLogDiv.appendChild(log2);
+        
+        document.getElementById('playerHP').textContent = Math.max(0, currentPlayerHP);
+        
+        if (currentPlayerHP <= 0) {
+          const loseLog = document.createElement('div');
+          loseLog.textContent = '💔 You lost...';
+          loseLog.style.color = '#95a5a6';
+          loseLog.style.fontWeight = 'bold';
+          battleLogDiv.appendChild(loseLog);
+          
+          showNotification('Battle lost!', true);
+          
+          attackBtn.disabled = true;
+          exitBtn.disabled = false;
+          if (currentUser.role === 'owner' && hackerMenuBtn) {
+            hackerMenuBtn.disabled = false;
+          }
+        }
+        
+        battleLogDiv.scrollTop = battleLogDiv.scrollHeight;
+      };
+    }
+
+    function openMail() {
+      document.getElementById('currentScreenTitle').textContent = '📧 Mail';
+      const content = document.getElementById('mainContent');
+      content.innerHTML = '';
+      
+      const container = document.createElement('div');
+      
+      const title = document.createElement('h2');
+      title.textContent = '📧 Mail';
+      title.style.marginBottom = '20px';
+      container.appendChild(title);
+      
+      const userMailMessages = mailMessages.filter(m => m.receiverId === currentUser.id);
+      
+      if (userMailMessages.length === 0) {
+        const info = document.createElement('div');
+        info.className = 'message info-message';
+        info.textContent = 'No mail yet!';
+        container.appendChild(info);
+      } else {
+        userMailMessages.forEach(msg => {
+          const sender = allUsers.find(u => u.id === msg.senderId);
+          if (!sender) return;
+          
+          const mailItem = document.createElement('div');
+          mailItem.className = 'shop-item';
+          mailItem.style.flexDirection = 'column';
+          mailItem.style.alignItems = 'flex-start';
+          
+          const headerDiv = document.createElement('div');
+          headerDiv.style.width = '100%';
+          headerDiv.style.marginBottom = '10px';
+          headerDiv.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+              <div style="font-size: 24px;">${sender.profilePicture || '📚'}</div>
+              <div>
+                <strong>From: ${sender.username}</strong>${getRoleBadge(sender.role)}<br>
+                <small>${new Date(msg.timestamp).toLocaleString()}</small>
+              </div>
+            </div>
+          `;
+          mailItem.appendChild(headerDiv);
+          
+          const messageDiv = document.createElement('div');
+          messageDiv.style.marginBottom = '10px';
+          messageDiv.style.padding = '10px';
+          messageDiv.style.background = 'rgba(0,0,0,0.1)';
+          messageDiv.style.borderRadius = '6px';
+          messageDiv.style.width = '100%';
+          messageDiv.style.boxSizing = 'border-box';
+          messageDiv.textContent = msg.message;
+          mailItem.appendChild(messageDiv);
+          
+          const actionsDiv = document.createElement('div');
+          actionsDiv.style.display = 'flex';
+          actionsDiv.style.gap = '10px';
+          actionsDiv.style.width = '100%';
+          
+          const deleteBtn = document.createElement('button');
+          deleteBtn.className = 'btn-small btn-danger';
+          deleteBtn.textContent = '🗑️ Delete';
+          deleteBtn.onclick = async () => {
+            await deleteMailMessage(msg.id);
+          };
+          actionsDiv.appendChild(deleteBtn);
+          
+          mailItem.appendChild(actionsDiv);
+          container.appendChild(mailItem);
+        });
+      }
+      
+      const sendBtn = document.createElement('button');
+      sendBtn.className = 'btn';
+      sendBtn.textContent = '✉️ Send Mail';
+      sendBtn.style.marginTop = '20px';
+      sendBtn.onclick = () => openSendMailDialog();
+      container.appendChild(sendBtn);
+      
+      content.appendChild(container);
+    }
+
+    function openSendMailDialog() {
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      
+      const modalContent = document.createElement('div');
+      modalContent.className = 'modal';
+      
+      const title = document.createElement('h3');
+      title.textContent = 'Send Mail';
+      modalContent.appendChild(title);
+      
+      const recipientLabel = document.createElement('label');
+      recipientLabel.textContent = 'Send to:';
+      recipientLabel.style.display = 'block';
+      recipientLabel.style.marginBottom = '5px';
+      recipientLabel.style.fontWeight = '600';
+      modalContent.appendChild(recipientLabel);
+      
+      const recipientSelect = document.createElement('select');
+      recipientSelect.style.width = '100%';
+      recipientSelect.style.padding = '10px';
+      recipientSelect.style.marginBottom = '15px';
+      recipientSelect.style.borderRadius = '6px';
+      recipientSelect.style.border = '2px solid #e0e0e0';
+      
+      const placeholder = document.createElement('option');
+      placeholder.value = '';
+      placeholder.textContent = 'Select a user...';
+      recipientSelect.appendChild(placeholder);
+      
+      allUsers.filter(u => u.id !== currentUser.id).forEach(user => {
+        const option = document.createElement('option');
+        option.value = user.id;
+        option.textContent = user.username;
+        recipientSelect.appendChild(option);
+      });
+      modalContent.appendChild(recipientSelect);
+      
+      const messageLabel = document.createElement('label');
+      messageLabel.textContent = 'Message:';
+      messageLabel.style.display = 'block';
+      messageLabel.style.marginBottom = '5px';
+      messageLabel.style.fontWeight = '600';
+      modalContent.appendChild(messageLabel);
+      
+      const messageInput = document.createElement('textarea');
+      messageInput.id = 'mailMessage';
+      messageInput.placeholder = 'Type your message...';
+      messageInput.style.width = '100%';
+      messageInput.style.padding = '10px';
+      messageInput.style.minHeight = '100px';
+      messageInput.style.borderRadius = '6px';
+      messageInput.style.border = '2px solid #e0e0e0';
+      messageInput.style.boxSizing = 'border-box';
+      messageInput.style.fontFamily = 'inherit';
+      messageInput.style.marginBottom = '15px';
+      modalContent.appendChild(messageInput);
+      
+      const sendBtn = document.createElement('button');
+      sendBtn.className = 'btn';
+      sendBtn.type = 'button';
+      sendBtn.textContent = '✉️ Send';
+      sendBtn.onclick = async () => {
+        const recipientId = recipientSelect.value;
+        const message = messageInput.value.trim();
+        
+        if (!recipientId) {
+          showNotification('Select a recipient!', true);
+          return;
+        }
+        
+        if (!message) {
+          showNotification('Enter a message!', true);
+          return;
+        }
+        
+        const result = await window.dataSdk.create({
+          id: Date.now().toString(),
+          type: 'mail',
+          senderId: currentUser.id,
+          senderName: currentUser.username,
+          senderPic: currentUser.profilePicture || '📚',
+          receiverId: recipientId,
+          message: message,
+          timestamp: new Date().toISOString()
+        });
+        
+        if (result.isOk) {
+          showNotification('Mail sent! ✉️');
+          modal.remove();
+          openMail();
+        } else {
+          showNotification('Failed to send mail!', true);
+        }
+      };
+      modalContent.appendChild(sendBtn);
+      
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'btn btn-secondary';
+      cancelBtn.type = 'button';
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.onclick = () => modal.remove();
+      modalContent.appendChild(cancelBtn);
+      
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+    }
+
+    async function deleteMailMessage(mailId) {
+      const mail = mailMessages.find(m => m.id === mailId);
+      if (mail) {
+        const result = await window.dataSdk.delete(mail);
+        if (result.isOk) {
+          showNotification('Mail deleted');
+          openMail();
+        }
+      }
+    }
+
+    function openAllUsers() {
+      document.getElementById('currentScreenTitle').textContent = '👥 All Users';
+      const content = document.getElementById('mainContent');
+      content.innerHTML = '';
+      
+      const container = document.createElement('div');
+      
+      const title = document.createElement('h2');
+      title.textContent = '👥 All Users';
+      title.style.marginBottom = '20px';
+      container.appendChild(title);
+      
+      if (currentUser.role === 'owner') {
+        const userInfo = document.createElement('div');
+        userInfo.className = 'message info-message';
+        userInfo.innerHTML = '👑 <strong>Owner Access:</strong> Click the <strong>Data</strong> button above to view the complete Canva Sheet with all user records!<br><br>💡 You can also browse and interact with players below:';
+        container.appendChild(userInfo);
+      }
+      
+      const searchDiv = document.createElement('div');
+      searchDiv.style.marginBottom = '20px';
+      searchDiv.style.display = 'flex';
+      searchDiv.style.gap = '10px';
+      
+      const searchInput = document.createElement('input');
+      searchInput.type = 'text';
+      searchInput.placeholder = 'Search by username...';
+      searchInput.style.flex = '1';
+      searchInput.style.padding = '12px';
+      searchInput.style.border = '2px solid #667eea';
+      searchInput.style.borderRadius = '8px';
+      searchInput.style.fontSize = '16px';
+      searchInput.id = 'userSearch';
+      
+      const usersListDiv = document.createElement('div');
+      usersListDiv.id = 'usersList';
+      
+      function filterAndDisplayUsers(searchTerm = '') {
+        usersListDiv.innerHTML = '';
+        const filtered = allUsers.filter(user => 
+          user.username.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+        
+        if (filtered.length === 0 && searchTerm) {
+          const noResults = document.createElement('div');
+          noResults.className = 'message error-message';
+          noResults.textContent = 'No users found matching that search.';
+          usersListDiv.appendChild(noResults);
+        } else {
+          filtered.forEach(user => {
+            const userItem = document.createElement('div');
+            userItem.className = 'shop-item';
+            userItem.style.cursor = 'pointer';
+            userItem.innerHTML = `
+              <div>
+                <div style="font-size: 24px;">${user.profilePicture || '📚'}</div>
+                <strong>${user.username}</strong>${getRoleBadge(user.role)}<br>
+                <small>Coins: ${user.coins || 0} | XP: ${user.xp || 0} | Grade: ${user.grade}</small>
+              </div>
+              <button class="btn-small">Manage</button>
+            `;
+            userItem.onclick = () => manageUser(user);
+            usersListDiv.appendChild(userItem);
+          });
+        }
+      }
+      
+      searchInput.addEventListener('input', (e) => {
+        filterAndDisplayUsers(e.target.value);
+      });
+      
+      searchDiv.appendChild(searchInput);
+      container.appendChild(searchDiv);
+      container.appendChild(usersListDiv);
+      
+      content.appendChild(container);
+      
+      filterAndDisplayUsers();
+    }
+
+    function manageUser(user) {
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      
+      const modalContent = document.createElement('div');
+      modalContent.className = 'modal';
+      
+      const title = document.createElement('h3');
+      title.textContent = `${user.profilePicture || '📚'} ${user.username}`;
+      modalContent.appendChild(title);
+      
+      const stats = document.createElement('div');
+      stats.innerHTML = `
+        <p><strong>Role:</strong> ${user.role}${getRoleBadge(user.role)}</p>
+        <p><strong>Grade:</strong> ${user.grade}</p>
+        <p><strong>Coins:</strong> ${user.coins || 0}</p>
+        <p><strong>XP:</strong> ${user.xp || 0}</p>
+        <p><strong>Pet Seeds:</strong> ${user.petSeeds || 0}</p>
+        <p><strong>Legendary Pet Seeds:</strong> ${user.legendaryPetSeeds || 0}</p>
+        <p><strong>Pets Owned:</strong> ${user.ownedPets ? user.ownedPets.split(',').length : 0}</p>
+        ${user.bannedUntil && user.bannedUntil !== '' ? `<p style="color: #e74c3c;"><strong>⛔ BANNED until ${new Date(user.bannedUntil).toLocaleString()}</strong></p>` : ''}
+      `;
+      modalContent.appendChild(stats);
+      
+      if (currentUser.role === 'owner' && user.id !== currentUser.id) {
+        const passwordSection = document.createElement('div');
+        passwordSection.style.marginTop = '15px';
+        passwordSection.style.paddingTop = '15px';
+        passwordSection.style.borderTop = '1px solid #e0e0e0';
+        
+        const passwordTitle = document.createElement('h4');
+        passwordTitle.textContent = 'Password Management';
+        passwordSection.appendChild(passwordTitle);
+        
+        const currentPasswordDiv = document.createElement('div');
+        currentPasswordDiv.style.marginBottom = '15px';
+        currentPasswordDiv.style.padding = '10px';
+        currentPasswordDiv.style.background = '#f5f5f5';
+        currentPasswordDiv.style.borderRadius = '6px';
+        
+        const currentPasswordLabel = document.createElement('div');
+        currentPasswordLabel.style.fontWeight = '600';
+        currentPasswordLabel.style.marginBottom = '5px';
+        currentPasswordLabel.textContent = 'Current Password:';
+        currentPasswordDiv.appendChild(currentPasswordLabel);
+        
+        const passwordDisplay = document.createElement('div');
+        passwordDisplay.style.fontFamily = 'monospace';
+        passwordDisplay.style.fontSize = '14px';
+        passwordDisplay.style.wordBreak = 'break-all';
+        passwordDisplay.textContent = user.password;
+        currentPasswordDiv.appendChild(passwordDisplay);
+        passwordSection.appendChild(currentPasswordDiv);
+        
+        const newPasswordLabel = document.createElement('label');
+        newPasswordLabel.textContent = 'Set New Password:';
+        newPasswordLabel.style.display = 'block';
+        newPasswordLabel.style.marginBottom = '5px';
+        newPasswordLabel.style.fontWeight = '600';
+        passwordSection.appendChild(newPasswordLabel);
+        
+        const newPasswordInput = document.createElement('input');
+        newPasswordInput.type = 'text';
+        newPasswordInput.id = 'editUserPassword';
+        newPasswordInput.placeholder = 'Enter new password';
+        newPasswordInput.style.width = '100%';
+        newPasswordInput.style.padding = '10px';
+        newPasswordInput.style.marginBottom = '10px';
+        newPasswordInput.style.borderRadius = '6px';
+        newPasswordInput.style.border = '2px solid #e0e0e0';
+        newPasswordInput.style.boxSizing = 'border-box';
+        passwordSection.appendChild(newPasswordInput);
+        
+        const changePasswordBtn = document.createElement('button');
+        changePasswordBtn.className = 'btn btn-secondary';
+        changePasswordBtn.type = 'button';
+        changePasswordBtn.textContent = 'Change Password';
+        changePasswordBtn.onclick = async () => {
+          const newPass = document.getElementById('editUserPassword').value.trim();
+          if (!newPass) {
+            showNotification('Enter a new password!', true);
+            return;
+          }
+          user.password = newPass;
+          await window.dataSdk.update(user);
+          showNotification(`${user.username}'s password updated!`);
+          modal.remove();
+          openAllUsers();
+        };
+        passwordSection.appendChild(changePasswordBtn);
+        
+        modalContent.appendChild(passwordSection);
+      }
+      
+      if (user.id !== currentUser.id) {
+        const friendIds = currentUser.friends ? currentUser.friends.split(',') : [];
+        const isFriend = friendIds.includes(user.id);
+        
+        const blockedIds = currentUser.blockedUsers ? currentUser.blockedUsers.split(',') : [];
+        const isBlocked = blockedIds.includes(user.id);
+        
+        if (isFriend) {
+          const unfriendBtn = document.createElement('button');
+          unfriendBtn.className = 'btn btn-warning';
+          unfriendBtn.type = 'button';
+          unfriendBtn.textContent = '💔 Unfriend';
+          unfriendBtn.onclick = async () => {
+            await toggleFriend(user.id);
+            modal.remove();
+            openAllUsers();
+          };
+          modalContent.appendChild(unfriendBtn);
+        } else if (!isBlocked) {
+          const friendBtn = document.createElement('button');
+          friendBtn.className = 'btn';
+          friendBtn.type = 'button';
+          friendBtn.textContent = '👥 Add Friend';
+          friendBtn.onclick = async () => {
+            await toggleFriend(user.id);
+            modal.remove();
+            openAllUsers();
+          };
+          modalContent.appendChild(friendBtn);
+        }
+        
+        if (isBlocked) {
+          const unblockBtn = document.createElement('button');
+          unblockBtn.className = 'btn';
+          unblockBtn.type = 'button';
+          unblockBtn.textContent = '✅ Unblock';
+          unblockBtn.onclick = async () => {
+            await toggleBlock(user.id);
+            modal.remove();
+            openAllUsers();
+          };
+          modalContent.appendChild(unblockBtn);
+        } else {
+          const blockBtn = document.createElement('button');
+          blockBtn.className = 'btn btn-danger';
+          blockBtn.type = 'button';
+          blockBtn.textContent = '🚫 Block';
+          blockBtn.onclick = async () => {
+            await toggleBlock(user.id);
+            modal.remove();
+            openAllUsers();
+          };
+          modalContent.appendChild(blockBtn);
+        }
+        
+        const sendItemBtn = document.createElement('button');
+        sendItemBtn.className = 'btn btn-secondary';
+        sendItemBtn.type = 'button';
+        sendItemBtn.textContent = '🎁 Send Item';
+        sendItemBtn.onclick = () => {
+          modal.remove();
+          openSendItemDialog(user);
+        };
+        modalContent.appendChild(sendItemBtn);
+        
+        if (currentUser.role === 'owner' && user.id !== currentUser.id) {
+          const deleteSection = document.createElement('div');
+          deleteSection.style.marginTop = '15px';
+          deleteSection.style.paddingTop = '15px';
+          deleteSection.style.borderTop = '1px solid #e0e0e0';
+          
+          const deleteBtn = document.createElement('button');
+          deleteBtn.className = 'btn btn-danger';
+          deleteBtn.type = 'button';
+          deleteBtn.textContent = '🗑️ Delete Account';
+          deleteBtn.style.marginBottom = '10px';
+          deleteBtn.onclick = async () => {
+            deleteBtn.style.display = 'none';
+            
+            const confirmDiv = document.createElement('div');
+            confirmDiv.style.background = '#fee';
+            confirmDiv.style.padding = '15px';
+            confirmDiv.style.borderRadius = '6px';
+            confirmDiv.style.marginBottom = '10px';
+            confirmDiv.style.border = '2px solid #e74c3c';
+            
+            const confirmText = document.createElement('p');
+            confirmText.textContent = `⚠️ Permanently delete ${user.username}'s account? This cannot be undone!`;
+            confirmText.style.margin = '0 0 10px 0';
+            confirmDiv.appendChild(confirmText);
+            
+            const confirmYesBtn = document.createElement('button');
+            confirmYesBtn.className = 'btn btn-danger';
+            confirmYesBtn.type = 'button';
+            confirmYesBtn.textContent = 'Yes, Delete';
+            confirmYesBtn.style.marginRight = '10px';
+            confirmYesBtn.onclick = async () => {
+              confirmYesBtn.disabled = true;
+              confirmYesBtn.textContent = 'Deleting...';
+              
+              const result = await window.dataSdk.delete(user);
+              if (result.isOk) {
+                showNotification(`${user.username}'s account deleted!`);
+                modal.remove();
+                openAllUsers();
+              } else {
+                showNotification('Failed to delete account', true);
+                confirmYesBtn.disabled = false;
+                confirmYesBtn.textContent = 'Yes, Delete';
+              }
+            };
+            confirmDiv.appendChild(confirmYesBtn);
+            
+            const confirmNoBtn = document.createElement('button');
+            confirmNoBtn.className = 'btn btn-secondary';
+            confirmNoBtn.type = 'button';
+            confirmNoBtn.textContent = 'Cancel';
+            confirmNoBtn.onclick = () => {
+              confirmDiv.remove();
+              deleteBtn.style.display = 'block';
+            };
+            confirmDiv.appendChild(confirmNoBtn);
+            
+            deleteSection.insertBefore(confirmDiv, deleteBtn);
+          };
+          deleteSection.appendChild(deleteBtn);
+          modalContent.appendChild(deleteSection);
+        }
+        
+        if (hasModPerms(currentUser.role) && canModerate(currentUser.role, user.role)) {
+          const modTitle = document.createElement('h4');
+          modTitle.textContent = 'Moderation Actions';
+          modTitle.style.marginTop = '20px';
+          modTitle.style.color = '#e74c3c';
+          modalContent.appendChild(modTitle);
+          
+          if (!user.bannedUntil || user.bannedUntil === '' || new Date(user.bannedUntil) <= new Date()) {
+            const banBtn = document.createElement('button');
+            banBtn.className = 'btn btn-danger';
+            banBtn.type = 'button';
+            banBtn.textContent = '⛔ Ban User';
+            banBtn.onclick = () => {
+              modal.remove();
+              openBanDialog(user);
+            };
+            modalContent.appendChild(banBtn);
+          } else {
+            const unbanBtn = document.createElement('button');
+            unbanBtn.className = 'btn';
+            unbanBtn.type = 'button';
+            unbanBtn.textContent = '✅ Unban User';
+            unbanBtn.onclick = async () => {
+              user.bannedUntil = '';
+              user.bannedBy = '';
+              await window.dataSdk.update(user);
+              showNotification(`${user.username} unbanned!`);
+              modal.remove();
+              openAllUsers();
+            };
+            modalContent.appendChild(unbanBtn);
+          }
+          
+          if (roleHierarchy[currentUser.role] >= 3) {
+            const promoteBtn = document.createElement('button');
+            promoteBtn.className = 'btn';
+            promoteBtn.type = 'button';
+            promoteBtn.textContent = '⬆️ Promote';
+            promoteBtn.onclick = () => {
+              modal.remove();
+              openPromoteDemoteDialog(user, true);
+            };
+            modalContent.appendChild(promoteBtn);
+            
+            const demoteBtn = document.createElement('button');
+            demoteBtn.className = 'btn btn-warning';
+            demoteBtn.type = 'button';
+            demoteBtn.textContent = '⬇️ Demote';
+            demoteBtn.onclick = () => {
+              modal.remove();
+              openPromoteDemoteDialog(user, false);
+            };
+            modalContent.appendChild(demoteBtn);
+          }
+        }
+      }
+      
+      const closeBtn = document.createElement('button');
+      closeBtn.className = 'btn btn-secondary';
+      closeBtn.type = 'button';
+      closeBtn.textContent = 'Close';
+      closeBtn.style.marginTop = '15px';
+      closeBtn.onclick = () => modal.remove();
+      modalContent.appendChild(closeBtn);
+      
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+    }
+
+    async function toggleFriend(userId) {
+      const friendIds = currentUser.friends ? currentUser.friends.split(',').filter(f => f) : [];
+      const index = friendIds.indexOf(userId);
+      
+      if (index > -1) {
+        friendIds.splice(index, 1);
+        showNotification('Friend removed');
+      } else {
+        friendIds.push(userId);
+        showNotification('Friend added!');
+      }
+      
+      currentUser.friends = friendIds.join(',');
+      await window.dataSdk.update(currentUser);
+    }
+
+    async function toggleBlock(userId) {
+      const blockedIds = currentUser.blockedUsers ? currentUser.blockedUsers.split(',').filter(b => b) : [];
+      const index = blockedIds.indexOf(userId);
+      
+      if (index > -1) {
+        blockedIds.splice(index, 1);
+        showNotification('User unblocked');
+      } else {
+        blockedIds.push(userId);
+        
+        const friendIds = currentUser.friends ? currentUser.friends.split(',').filter(f => f) : [];
+        const friendIndex = friendIds.indexOf(userId);
+        if (friendIndex > -1) {
+          friendIds.splice(friendIndex, 1);
+          currentUser.friends = friendIds.join(',');
+        }
+        
+        showNotification('User blocked');
+      }
+      
+      currentUser.blockedUsers = blockedIds.join(',');
+      await window.dataSdk.update(currentUser);
+    }
+
+    function openBanDialog(user) {
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      
+      const modalContent = document.createElement('div');
+      modalContent.className = 'modal';
+      
+      const title = document.createElement('h3');
+      title.textContent = `Ban ${user.username}`;
+      title.style.color = '#e74c3c';
+      modalContent.appendChild(title);
+      
+      const info = document.createElement('p');
+      info.textContent = 'Select ban duration:';
+      modalContent.appendChild(info);
+      
+      const durations = [
+        { label: '5 minutes', minutes: 5 },
+        { label: '15 minutes', minutes: 15 },
+        { label: '30 minutes', minutes: 30 },
+        { label: '1 hour', minutes: 60 },
+        { label: '24 hours', minutes: 1440 },
+        { label: '7 days', minutes: 10080 }
+      ];
+      
+      durations.forEach(duration => {
+        const btn = document.createElement('button');
+        btn.className = 'btn btn-danger';
+        btn.type = 'button';
+        btn.textContent = duration.label;
+        btn.onclick = async () => {
+          const banUntil = new Date(Date.now() + duration.minutes * 60000);
+          user.bannedUntil = banUntil.toISOString();
+          user.bannedBy = currentUser.id;
+          await window.dataSdk.update(user);
+          showNotification(`${user.username} banned for ${duration.label}`);
+          modal.remove();
+          openAllUsers();
+        };
+        modalContent.appendChild(btn);
+      });
+      
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'btn btn-secondary';
+      cancelBtn.type = 'button';
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.style.marginTop = '15px';
+      cancelBtn.onclick = () => modal.remove();
+      modalContent.appendChild(cancelBtn);
+      
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+    }
+
+    function openPromoteDemoteDialog(user, isPromote) {
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      
+      const modalContent = document.createElement('div');
+      modalContent.className = 'modal';
+      
+      const title = document.createElement('h3');
+      title.textContent = `${isPromote ? 'Promote' : 'Demote'} ${user.username}`;
+      modalContent.appendChild(title);
+      
+      const currentRole = document.createElement('p');
+      currentRole.innerHTML = `<strong>Current Role:</strong> ${user.role}${getRoleBadge(user.role)}`;
+      modalContent.appendChild(currentRole);
+      
+      const info = document.createElement('p');
+      info.textContent = `Select new role:`;
+      modalContent.appendChild(info);
+      
+      const roles = isPromote 
+        ? ['mod', 'admin', 'coowner']
+        : ['pawn', 'gamer', 'mod', 'admin'];
+      
+      roles.forEach(role => {
+        if (roleHierarchy[role] < roleHierarchy[currentUser.role]) {
+          const btn = document.createElement('button');
+          btn.className = 'btn';
+          btn.type = 'button';
+          btn.innerHTML = role.toUpperCase() + getRoleBadge(role);
+          btn.onclick = async () => {
+            user.role = role;
+            if (role === 'gamer' && (!user.profilePicture || user.profilePicture === '📚')) {
+              user.profilePicture = '🎮';
+            }
+            await window.dataSdk.update(user);
+            showNotification(`${user.username} ${isPromote ? 'promoted' : 'changed'} to ${role}!`);
+            modal.remove();
+            openAllUsers();
+          };
+          modalContent.appendChild(btn);
+        }
+      });
+      
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'btn btn-secondary';
+      cancelBtn.type = 'button';
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.style.marginTop = '15px';
+      cancelBtn.onclick = () => modal.remove();
+      modalContent.appendChild(cancelBtn);
+      
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+    }
+
+    function openSendItemDialog(recipient) {
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      
+      const modalContent = document.createElement('div');
+      modalContent.className = 'modal';
+      
+      const title = document.createElement('h3');
+      title.textContent = `Send Item to ${recipient.username}`;
+      modalContent.appendChild(title);
+      
+      const itemTypes = [
+        { type: 'coins', label: 'Coins', icon: '🪙' },
+        { type: 'xp', label: 'XP', icon: '⭐' },
+        { type: 'petSeeds', label: 'Pet Seeds', icon: '🌱' }
+      ];
+      
+      itemTypes.forEach(item => {
+        const itemDiv = document.createElement('div');
+        itemDiv.style.marginBottom = '15px';
+        
+        const label = document.createElement('label');
+        label.textContent = `${item.icon} ${item.label}:`;
+        label.style.display = 'block';
+        label.style.marginBottom = '5px';
+        itemDiv.appendChild(label);
+        
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.id = `send_${item.type}`;
+        input.placeholder = `Amount of ${item.label}`;
+        input.min = '0';
+        input.style.width = '100%';
+        input.style.padding = '8px';
+        input.style.borderRadius = '6px';
+        input.style.border = '2px solid #e0e0e0';
+        itemDiv.appendChild(input);
+        
+        modalContent.appendChild(itemDiv);
+      });
+      
+      if (currentUser.ownedPets && currentUser.ownedPets !== '') {
+        const petLabel = document.createElement('h4');
+        petLabel.textContent = '🐾 Send a Pet:';
+        petLabel.style.marginTop = '20px';
+        modalContent.appendChild(petLabel);
+        
+        const pets = currentUser.ownedPets.split(',');
+        const levels = currentUser.petLevels.split(',');
+        const names = currentUser.petNames.split(',');
+        
+        pets.forEach((pet, index) => {
+          const petDiv = document.createElement('div');
+          petDiv.className = 'pet-slot';
+          petDiv.style.display = 'inline-block';
+          petDiv.style.margin = '5px';
+          petDiv.style.width = 'auto';
+          petDiv.style.padding = '10px';
+          petDiv.innerHTML = `
+            <div style="font-size: 24px; text-align: center;">${pet}</div>
+            <div style="text-align: center; font-size: 11px;"><strong>${names[index]}</strong> Lv.${levels[index]}</div>
+          `;
+          petDiv.onclick = () => {
+            modal.remove();
+            sendPetToUser(recipient, index);
+          };
+          modalContent.appendChild(petDiv);
+        });
+      }
+      
+      const sendBtn = document.createElement('button');
+      sendBtn.className = 'btn';
+      sendBtn.type = 'button';
+      sendBtn.textContent = '🎁 Send Items';
+      sendBtn.onclick = async () => {
+        const coins = parseInt(document.getElementById('send_coins').value) || 0;
+        const xp = parseInt(document.getElementById('send_xp').value) || 0;
+        const seeds = parseInt(document.getElementById('send_petSeeds').value) || 0;
+        
+        if (coins === 0 && xp === 0 && seeds === 0) {
+          showNotification('Enter at least one item!', true);
+          return;
+        }
+        
+        if (currentUser.role !== 'owner') {
+          if (coins > currentUser.coins) {
+            showNotification('Not enough coins!', true);
+            return;
+          }
+          if (seeds > (currentUser.petSeeds || 0)) {
+            showNotification('Not enough pet seeds!', true);
+            return;
+          }
+        }
+        
+        if (currentUser.role !== 'owner') {
+          currentUser.coins -= coins;
+          currentUser.petSeeds = (currentUser.petSeeds || 0) - seeds;
+        }
+        
+        recipient.coins = (recipient.coins || 0) + coins;
+        recipient.xp = (recipient.xp || 0) + xp;
+        recipient.petSeeds = (recipient.petSeeds || 0) + seeds;
+        
+        await window.dataSdk.update(currentUser);
+        await window.dataSdk.update(recipient);
+        
+        let itemText = [];
+        if (coins > 0) itemText.push(`${coins} coins`);
+        if (xp > 0) itemText.push(`${xp} XP`);
+        if (seeds > 0) itemText.push(`${seeds} seeds`);
+        
+        showNotification(`Sent ${itemText.join(', ')} to ${recipient.username}!`);
+        updateUI();
+        modal.remove();
+      };
+      modalContent.appendChild(sendBtn);
+      
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'btn btn-secondary';
+      cancelBtn.type = 'button';
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.onclick = () => modal.remove();
+      modalContent.appendChild(cancelBtn);
+      
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+    }
+
+    async function sendPetToUser(recipient, petIndex) {
+      const pets = currentUser.ownedPets.split(',');
+      const rarities = currentUser.petRarities.split(',');
+      const levels = currentUser.petLevels.split(',');
+      const names = currentUser.petNames.split(',');
+      const hps = currentUser.petCurrentHP.split(',');
+      
+      const petToSend = pets[petIndex];
+      const rarityToSend = rarities[petIndex];
+      const levelToSend = levels[petIndex];
+      const nameToSend = names[petIndex];
+      const hpToSend = hps[petIndex];
+      
+      pets.splice(petIndex, 1);
+      rarities.splice(petIndex, 1);
+      levels.splice(petIndex, 1);
+      names.splice(petIndex, 1);
+      hps.splice(petIndex, 1);
+      
+      currentUser.ownedPets = pets.join(',');
+      currentUser.petRarities = rarities.join(',');
+      currentUser.petLevels = levels.join(',');
+      currentUser.petNames = names.join(',');
+      currentUser.petCurrentHP = hps.join(',');
+      
+      const recPets = recipient.ownedPets ? recipient.ownedPets.split(',').filter(p => p) : [];
+      const recRarities = recipient.petRarities ? recipient.petRarities.split(',').filter(r => r) : [];
+      const recLevels = recipient.petLevels ? recipient.petLevels.split(',').filter(l => l) : [];
+      const recNames = recipient.petNames ? recipient.petNames.split(',').filter(n => n) : [];
+      const recHPs = recipient.petCurrentHP ? recipient.petCurrentHP.split(',').filter(h => h) : [];
+      
+      recPets.push(petToSend);
+      recRarities.push(rarityToSend);
+      recLevels.push(levelToSend);
+      recNames.push(nameToSend);
+      recHPs.push(hpToSend);
+      
+      recipient.ownedPets = recPets.join(',');
+      recipient.petRarities = recRarities.join(',');
+      recipient.petLevels = recLevels.join(',');
+      recipient.petNames = recNames.join(',');
+      recipient.petCurrentHP = recHPs.join(',');
+      
+      await window.dataSdk.update(currentUser);
+      await window.dataSdk.update(recipient);
+      
+      showNotification(`Sent ${nameToSend} to ${recipient.username}! 🐾`);
+      updateUI();
+    }
+
+    function openFriends() {
+      document.getElementById('currentScreenTitle').textContent = '👥 Friends';
+      const content = document.getElementById('mainContent');
+      content.innerHTML = '';
+      
+      const container = document.createElement('div');
+      
+      const title = document.createElement('h2');
+      title.textContent = '👥 Friends';
+      title.style.marginBottom = '20px';
+      container.appendChild(title);
+      
+      const friendIds = currentUser.friends ? currentUser.friends.split(',').filter(f => f) : [];
+      
+      if (friendIds.length === 0) {
+        const info = document.createElement('div');
+        info.className = 'message info-message';
+        info.textContent = 'No friends yet! Add friends from the All Users page.';
+        container.appendChild(info);
+      } else {
+        friendIds.forEach(friendId => {
+          const friend = allUsers.find(u => u.id === friendId);
+          if (!friend) return;
+          
+          const friendItem = document.createElement('div');
+          friendItem.className = 'shop-item';
+          friendItem.innerHTML = `
+            <div>
+              <div style="font-size: 24px;">${friend.profilePicture || '📚'}</div>
+              <strong>${friend.username}</strong>${getRoleBadge(friend.role)}<br>
+              <small>Level ${Math.floor((friend.xp || 0) / 100) + 1}</small>
+            </div>
+            <button class="btn-small" type="button" onclick="manageUser(allUsers.find(u => u.id === '${friend.id}'))">View</button>
+          `;
+          container.appendChild(friendItem);
+        });
+      }
+      
+      content.appendChild(container);
+    }
+
+    function openShop() {
+      document.getElementById('currentScreenTitle').textContent = '🛒 Shop';
+      const content = document.getElementById('mainContent');
+      content.innerHTML = '';
+      
+      const container = document.createElement('div');
+      
+      const title = document.createElement('h2');
+      title.textContent = '🛒 Shop';
+      title.style.marginBottom = '20px';
+      container.appendChild(title);
+      
+      const isOwner = currentUser.role === 'owner';
+      
+      const items = [
+        { name: 'Pet Seed', emoji: '🌱', cost: 50, desc: 'Grow a random pet!', ownerOnly: false },
+        { name: 'Pet Seed x10', emoji: '🌱🌱', cost: 450, desc: 'Buy 10 pet seeds!', ownerOnly: false },
+        { name: 'Level Up Book', emoji: '📖', cost: 100, desc: 'Level up selected pet', ownerOnly: false },
+        { name: 'Level Up Book x10', emoji: '📖📖', cost: 900, desc: 'Buy 10 level up books!', ownerOnly: false },
+        { name: 'Level Up Book x100B', emoji: '📖📖📖', cost: 100000000000, desc: 'Buy 100 billion level up books!', ownerOnly: true },
+        { name: 'XP Boost', emoji: '⭐', cost: 100, desc: '+50 XP instantly', ownerOnly: false },
+        { name: 'XP Boost x10', emoji: '⭐⭐', cost: 900, desc: 'Buy 10 XP boosts (+500 XP)!', ownerOnly: false },
+        { name: 'Car Pet (50% OFF!)', emoji: '🚗', cost: 75, desc: 'Supreme car - Half Price!', ownerOnly: false },
+        { name: 'SUV Pet (50% OFF!)', emoji: '🚙', cost: 90, desc: 'Supreme SUV - Half Price!', ownerOnly: false },
+        { name: 'Taxi Pet (50% OFF!)', emoji: '🚕', cost: 70, desc: 'Supreme taxi - Half Price!', ownerOnly: false },
+        { name: 'Bus Pet (50% OFF!)', emoji: '🚌', cost: 100, desc: 'Supreme bus - Half Price!', ownerOnly: false },
+        { name: 'Robot Pet (50% OFF!)', emoji: '🤖', cost: 125, desc: 'Supreme robot - Half Price!', ownerOnly: false },
+        { name: 'Hecker Pet', emoji: '🐿️', cost: 5000, desc: 'Exclusive squirrel!', ownerOnly: true },
+        { name: 'Beluga Pet', emoji: '🐱', cost: 3000, desc: 'Exclusive cat!', ownerOnly: true },
+        { name: 'Hamster Pet', emoji: '🐹', cost: 4000, desc: 'Exclusive hamster!', ownerOnly: true },
+        { name: 'Bread Pet', emoji: '🍞', cost: 1000, desc: 'Legendary bread!', ownerOnly: true }
+      ];
+      
+      items.forEach(item => {
+        if (item.ownerOnly && !isOwner) return;
+        
+        const shopItem = document.createElement('div');
+        shopItem.className = 'shop-item';
+        shopItem.innerHTML = `
+          <div>
+            <div style="font-size: 24px; margin-bottom: 5px;">${item.emoji}</div>
+            <strong>${item.name}</strong>${item.ownerOnly ? ' 👑' : ''}<br>
+            <small>${item.desc}</small>
+          </div>
+          <div>
+            <strong>${item.cost} 🪙</strong><br>
+            <button class="btn-small" type="button" onclick="buyItem('${item.name}', ${item.cost}, '${item.emoji}')">Buy</button>
+          </div>
+        `;
+        container.appendChild(shopItem);
+      });
+      
+      content.appendChild(container);
+    }
+
+    function addPetToInventory(petEmoji, rarity, name, hp) {
+      const pets = currentUser.ownedPets ? currentUser.ownedPets.split(',').filter(p => p) : [];
+      const rarities = currentUser.petRarities ? currentUser.petRarities.split(',').filter(r => r) : [];
+      const levels = currentUser.petLevels ? currentUser.petLevels.split(',').filter(l => l) : [];
+      const names = currentUser.petNames ? currentUser.petNames.split(',').filter(n => n) : [];
+      const hps = currentUser.petCurrentHP ? currentUser.petCurrentHP.split(',').filter(h => h) : [];
+      
+      pets.push(petEmoji);
+      rarities.push(rarity);
+      levels.push('1');
+      names.push(name);
+      hps.push(hp.toString());
+      
+      currentUser.ownedPets = pets.join(',');
+      currentUser.petRarities = rarities.join(',');
+      currentUser.petLevels = levels.join(',');
+      currentUser.petNames = names.join(',');
+      currentUser.petCurrentHP = hps.join(',');
+    }
+
+    async function buyItem(itemName, cost, emoji) {
+      const isOwner = currentUser.role === 'owner';
+      
+      if (!isOwner && currentUser.coins < cost) {
+        showNotification('Not enough coins!', true);
+        return;
+      }
+      
+      if (!isOwner) {
+        currentUser.coins -= cost;
+      }
+      
+      if (itemName === 'Pet Seed') {
+        currentUser.petSeeds = (currentUser.petSeeds || 0) + 1;
+        showNotification('Bought Pet Seed! 🌱');
+      } else if (itemName === 'Pet Seed x10') {
+        currentUser.petSeeds = (currentUser.petSeeds || 0) + 10;
+        showNotification('Bought 10 Pet Seeds! 🌱🌱');
+      } else if (itemName === 'Level Up Book') {
+        currentUser.petLevelUpBooks = (currentUser.petLevelUpBooks || 0) + 1;
+        showNotification('Bought Level Up Book! 📖');
+      } else if (itemName === 'Level Up Book x10') {
+        currentUser.petLevelUpBooks = (currentUser.petLevelUpBooks || 0) + 10;
+        showNotification('Bought 10 Level Up Books! 📖📖');
+      } else if (itemName === 'Level Up Book x100B') {
+        currentUser.petLevelUpBooks = (currentUser.petLevelUpBooks || 0) + 100000000000;
+        showNotification('Bought 100 billion Level Up Books! 📖📖📖');
+      } else if (itemName === 'XP Boost') {
+        currentUser.xpBoosts = (currentUser.xpBoosts || 0) + 1;
+        showNotification('Bought XP Boost! ⭐');
+      } else if (itemName === 'XP Boost x10') {
+        currentUser.xpBoosts = (currentUser.xpBoosts || 0) + 10;
+        showNotification('Bought 10 XP Boosts! ⭐⭐');
+      } else if (itemName.includes('Car Pet')) {
+        addPetToInventory('🚗', petRarityByType['car'], petNamesByType['car'], petHPByType['car']);
+        showNotification('Bought Car pet! 🚗');
+      } else if (itemName.includes('SUV Pet')) {
+        addPetToInventory('🚙', petRarityByType['suv'], petNamesByType['suv'], petHPByType['suv']);
+        showNotification('Bought SUV pet! 🚙');
+      } else if (itemName.includes('Taxi Pet')) {
+        addPetToInventory('🚕', petRarityByType['taxi'], petNamesByType['taxi'], petHPByType['taxi']);
+        showNotification('Bought Taxi pet! 🚕');
+      } else if (itemName.includes('Bus Pet')) {
+        addPetToInventory('🚌', petRarityByType['bus'], petNamesByType['bus'], petHPByType['bus']);
+        showNotification('Bought Bus pet! 🚌');
+      } else if (itemName.includes('Robot Pet')) {
+        addPetToInventory('🤖', petRarityByType['robot'], petNamesByType['robot'], petHPByType['robot']);
+        showNotification('Bought Robot pet! 🤖');
+      } else if (itemName === 'Hecker Pet') {
+        addPetToInventory('🐿️', 'exclusive', 'Hecker', 2000);
+        showNotification('Bought Hecker pet! 🐿️');
+      } else if (itemName === 'Beluga Pet') {
+        addPetToInventory('🐱', 'exclusive', 'Beluga', 1000);
+        showNotification('Bought Beluga pet! 🐱');
+      } else if (itemName === 'Hamster Pet') {
+        addPetToInventory('🐹', 'exclusive', 'Hammy', 1500);
+        showNotification('Bought Hamster pet! 🐹');
+      } else if (itemName === 'Bread Pet') {
+        addPetToInventory('🍞', 'legendary', 'Bread Loaf', 500);
+        showNotification('Bought Bread pet! 🍞');
+      }
+      
+      await window.dataSdk.update(currentUser);
+      updateUI();
+      openShop();
+    }
+
+    async function levelUpPet(index, count = 1) {
+      const levels = currentUser.petLevels.split(',');
+      const names = currentUser.petNames.split(',');
+      const hps = currentUser.petCurrentHP.split(',');
+      
+      const currentLevel = parseInt(levels[index]);
+      
+      levels[index] = (currentLevel + count).toString();
+      hps[index] = (parseInt(hps[index]) + (50 * count)).toString();
+      
+      currentUser.petLevels = levels.join(',');
+      currentUser.petCurrentHP = hps.join(',');
+      
+      await window.dataSdk.update(currentUser);
+      showNotification(`${names[index]} leveled up ${count}x to ${levels[index]}! 📖`);
+      updateUI();
+    }
+
+    function openInventory() {
+      document.getElementById('currentScreenTitle').textContent = '🎒 Inventory';
+      const content = document.getElementById('mainContent');
+      content.innerHTML = '';
+      
+      const container = document.createElement('div');
+      
+      const title = document.createElement('h2');
+      title.textContent = '🎒 Inventory';
+      title.style.marginBottom = '20px';
+      container.appendChild(title);
+      
+      const info = document.createElement('div');
+      info.className = 'message info-message';
+      info.innerHTML = `
+        <strong>Pet Seeds:</strong> ${currentUser.petSeeds || 0}<br>
+        <strong>Legendary Pet Seeds:</strong> ${currentUser.legendaryPetSeeds || 0}<br>
+        <strong>Level Up Books:</strong> ${currentUser.petLevelUpBooks || 0}<br>
+        <strong>XP Boosts:</strong> ${currentUser.xpBoosts || 0}
+      `;
+      container.appendChild(info);
+      
+      if ((currentUser.petSeeds || 0) > 0) {
+        const plantBtn = document.createElement('button');
+        plantBtn.className = 'btn';
+        plantBtn.type = 'button';
+        plantBtn.textContent = '🌱 Plant a Seed';
+        plantBtn.onclick = plantSeed;
+        container.appendChild(plantBtn);
+      }
+      
+      if ((currentUser.legendaryPetSeeds || 0) > 0) {
+        const plantLegendaryBtn = document.createElement('button');
+        plantLegendaryBtn.className = 'btn';
+        plantLegendaryBtn.style.background = '#9b59b6';
+        plantLegendaryBtn.type = 'button';
+        plantLegendaryBtn.textContent = '✨🌱 Plant Legendary Seed (Guaranteed!)';
+        plantLegendaryBtn.onclick = plantLegendarySeed;
+        container.appendChild(plantLegendaryBtn);
+      }
+      
+      const isOwner = currentUser.role === 'owner';
+      const bookCount = currentUser.petLevelUpBooks || 0;
+      
+      if ((bookCount > 0 || isOwner) && currentUser.ownedPets && currentUser.ownedPets !== '') {
+        const levelUpBtn = document.createElement('button');
+        levelUpBtn.className = 'btn';
+        levelUpBtn.type = 'button';
+        levelUpBtn.textContent = '📖 Use Level Up Book';
+        levelUpBtn.onclick = () => showSelectPetForLevelUp(1);
+        container.appendChild(levelUpBtn);
+        
+        if (bookCount >= 100 || isOwner) {
+          const levelUp100Btn = document.createElement('button');
+          levelUp100Btn.className = 'btn';
+          levelUp100Btn.type = 'button';
+          levelUp100Btn.textContent = '📖📖 Use 100 Level Up Books';
+          levelUp100Btn.onclick = () => showSelectPetForLevelUp(100);
+          container.appendChild(levelUp100Btn);
+        }
+        
+        if (isOwner) {
+          const levelUpAllBtn = document.createElement('button');
+          levelUpAllBtn.className = 'btn';
+          levelUpAllBtn.style.background = '#9b59b6';
+          levelUpAllBtn.type = 'button';
+          levelUpAllBtn.textContent = '📖∞ Use Infinite Level Up Books (Owner Only)';
+          levelUpAllBtn.onclick = () => {
+            showSelectPetForLevelUp(999999);
+          };
+          container.appendChild(levelUpAllBtn);
+        }
+      }
+      
+      if ((currentUser.xpBoosts || 0) > 0) {
+        const xpBtn = document.createElement('button');
+        xpBtn.className = 'btn';
+        xpBtn.type = 'button';
+        xpBtn.textContent = '⭐ Use XP Boost (+50 XP)';
+        xpBtn.onclick = async () => {
+          currentUser.xpBoosts -= 1;
+          currentUser.xp = (currentUser.xp || 0) + 50;
+          await window.dataSdk.update(currentUser);
+          updateUI();
+          showNotification('Used XP Boost! +50 XP ⭐');
+          openInventory();
+        };
+        container.appendChild(xpBtn);
+      }
+      
+      content.appendChild(container);
+    }
+
+    async function plantSeed() {
+      if ((currentUser.petSeeds || 0) <= 0) {
+        showNotification('No pet seeds available!', true);
+        return;
+      }
+      
+      currentUser.petSeeds -= 1;
+      
+      const rng = Math.random();
+      let randomPet;
+      
+      if (rng < 0.35) {
+        const commonPets = ['🔥', '🦆', '🐦', '❄️', '🌲', '🔥🟠', '💧', '☁️', '🐶', '🐱', '🐭', '🦊', '🐻', '🌸🐱', '🔥🐱', '💧🐱', '🔥🥥', '🌸🥥', '🌸🌵', '💧🍄', '💧🌵', '🔥🫐', '⚡🍄', '🔥🍄', '⚡🫐', '🌸🫐'];
+        randomPet = commonPets[Math.floor(Math.random() * commonPets.length)];
+      } else if (rng < 0.60) {
+        const uncommonPets = ['🌲🔥', '☁️🔥', '❄️🔥', '🔥🔥', '💧🔥', '🎵'];
+        randomPet = uncommonPets[Math.floor(Math.random() * uncommonPets.length)];
+      } else if (rng < 0.85) {
+        const rarePets = ['🦅', '🌟', '🎃', '🍲', '🧸', '⚡', '👤', '🦑', '🔥🌟', '💧🌟', '🌲🌟', '☁️🌟', '❄️🌟', '🌸🪨', '🌸🍬', '🔥🪨', '⚡🌵', '💧🥥', '🔥🍬', '🌸🍄', '💧🫐', '⚡🐱'];
+        randomPet = rarePets[Math.floor(Math.random() * rarePets.length)];
+      } else if (rng < 0.94) {
+        const heroicPets = ['🦑🔥', '❄️🦣', '🐘', '🦕', '🌊', '⭐', '🔥🌵', '🔥🐶', '⚡🍬', '💧🍬', '💧🪨', '⚡🪨', '🌸🐶'];
+        randomPet = heroicPets[Math.floor(Math.random() * heroicPets.length)];
+      } else {
+        const legendaryPets = ['❄️🔥', '🌑', '💥', '✨', '🦅🔥', '❄️❄️', '🧊', '🦙', '✨🌟', '🌸', '🌟❄️', '🔮', '🌊🌟', '🔥🔥🔥', '🌱', '🔥🌸', '⭐❄️', '💪', '🐊', '🦖', '❄️🔥🔥', '💧⚡', '🌊❄️', '🐻❄️', '☀️', '🌙', '🌌', '☀️☀️', '🍄', '🐙', '✨✨', '🐝', '🌊🌊', '🪼', '🐟', '🌅', '👻', '👑❄️', '💬', '🌠', '🍞', '🔪🐱', '👨‍🌾🫐', '💧🐶', '🔥🦊', '⚡🦊', '💧🦊', '🪸🦊', '🌋🪨', '⚡🥥', '⚡🐶', '🌸🌵', '☀️🫐', '🌸🦊', '🤖🥬', '🔥🍄', '⚡🤖', '🍵🍬', '🌊🐱'];
+        randomPet = legendaryPets[Math.floor(Math.random() * legendaryPets.length)];
+      }
+      
+      const petType = petTypes[randomPet];
+      const petHP = petHPByType[petType];
+      const petName = petNamesByType[petType];
+      const petRarity = petRarityByType[petType];
+      
+      addPetToInventory(randomPet, petRarity, petName, petHP);
+      
+      await window.dataSdk.update(currentUser);
+      updateUI();
+      showNotification(`You got a ${petRarity.toUpperCase()} ${randomPet} ${petName} from a Pet Seed! 🌱`);
+      openInventory();
+    }
+
+    async function plantLegendarySeed() {
+      if ((currentUser.legendaryPetSeeds || 0) <= 0) {
+        showNotification('No legendary pet seeds available!', true);
+        return;
+      }
+      
+      currentUser.legendaryPetSeeds -= 1;
+      
+      const legendaryPets = ['❄️🔥', '🌑', '💥', '✨', '🦅🔥', '❄️❄️', '🧊', '🦙', '✨🌟', '🌸', '🌟❄️', '🔮', '🌊🌟', '🔥🔥🔥', '🌱', '🔥🌸', '⭐❄️', '💪', '🐊', '🦖', '❄️🔥🔥', '💧⚡', '🌊❄️', '🐻❄️', '☀️', '🌙', '🌌', '☀️☀️', '🍄', '🐙', '✨✨', '🐝', '🌊🌊', '🪼', '🐟', '🌅', '👻', '👑❄️', '💬', '🌠', '🍞', '🔪🐱', '👨‍🌾🫐', '💧🐶', '🔥🦊', '⚡🦊', '💧🦊', '🪸🦊', '🌋🪨', '⚡🥥', '⚡🐶', '🌸🌵', '☀️🫐', '🌸🦊', '🤖🥬', '🔥🍄', '⚡🤖', '🍵🍬', '🌊🐱'];
+      const randomPet = legendaryPets[Math.floor(Math.random() * legendaryPets.length)];
+      
+      const petType = petTypes[randomPet];
+      const petHP = petHPByType[petType];
+      const petName = petNamesByType[petType];
+      const petRarity = petRarityByType[petType];
+      
+      addPetToInventory(randomPet, petRarity, petName, petHP);
+      
+      await window.dataSdk.update(currentUser);
+      updateUI();
+      showNotification(`✨ YOU GOT A LEGENDARY ${randomPet} ${petName} from a Legendary Seed! ✨`);
+      openInventory();
+    }
+
+    function showSelectPetForLevelUp(count = 1) {
+      if (!currentUser.ownedPets || currentUser.ownedPets === '') {
+        showNotification('No pets to level up!', true);
+        return;
+      }
+
+      const isOwner = currentUser.role === 'owner';
+      const actualCount = isOwner ? count : Math.min(count, currentUser.petLevelUpBooks || 0);
+      
+      if (actualCount <= 0 && !isOwner) {
+        showNotification('Not enough Level Up Books!', true);
+        return;
+      }
+
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      
+      const modalContent = document.createElement('div');
+      modalContent.className = 'modal';
+      
+      const title = document.createElement('h3');
+      title.textContent = count === 999999 ? 'Select Pet - Infinite Level Up' : `Select Pet to Level Up (x${actualCount})`;
+      modalContent.appendChild(title);
+      
+      if (isOwner) {
+        const ownerNotice = document.createElement('p');
+        ownerNotice.innerHTML = '👑 <strong>Owner Mode:</strong> Click a pet to use books, or use the ⚙️ button to set a custom level (no limits)!';
+        ownerNotice.style.color = '#f39c12';
+        ownerNotice.style.marginBottom = '15px';
+        modalContent.appendChild(ownerNotice);
+      }
+      
+      const pets = currentUser.ownedPets.split(',');
+      const levels = currentUser.petLevels.split(',');
+      const names = currentUser.petNames.split(',');
+      
+      pets.forEach((pet, index) => {
+        const petDiv = document.createElement('div');
+        petDiv.className = 'pet-slot';
+        petDiv.style.display = 'flex';
+        petDiv.style.justifyContent = 'space-between';
+        petDiv.style.alignItems = 'center';
+        
+        const petInfo = document.createElement('div');
+        petInfo.style.flex = '1';
+        petInfo.innerHTML = `
+          <div style="font-size: 32px; text-align: center;">${pet}</div>
+          <div style="text-align: center;"><strong>${names[index]}</strong> Lv.${levels[index]}</div>
+        `;
+        
+        petDiv.appendChild(petInfo);
+        
+        const buttonsDiv = document.createElement('div');
+        buttonsDiv.style.display = 'flex';
+        buttonsDiv.style.gap = '5px';
+        buttonsDiv.style.flexDirection = 'column';
+        
+        const levelUpBtn = document.createElement('button');
+        levelUpBtn.className = 'btn-small';
+        levelUpBtn.type = 'button';
+        levelUpBtn.textContent = count === 999999 ? '∞ Level' : `+${actualCount}`;
+        levelUpBtn.style.whiteSpace = 'nowrap';
+        levelUpBtn.onclick = async () => {
+          if (!isOwner) {
+            currentUser.petLevelUpBooks = Math.max(0, (currentUser.petLevelUpBooks || 0) - actualCount);
+          }
+          await levelUpPet(index, actualCount);
+          modal.remove();
+          openInventory();
+        };
+        buttonsDiv.appendChild(levelUpBtn);
+        
+        if (isOwner) {
+          const setLevelBtn = document.createElement('button');
+          setLevelBtn.className = 'btn-small';
+          setLevelBtn.style.background = '#9b59b6';
+          setLevelBtn.type = 'button';
+          setLevelBtn.textContent = '⚙️ Set';
+          setLevelBtn.onclick = () => {
+            modal.remove();
+            openSetCustomLevel(index);
+          };
+          buttonsDiv.appendChild(setLevelBtn);
+        }
+        
+        petDiv.appendChild(buttonsDiv);
+        modalContent.appendChild(petDiv);
+      });
+      
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'btn btn-secondary';
+      cancelBtn.type = 'button';
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.style.marginTop = '15px';
+      cancelBtn.onclick = () => modal.remove();
+      modalContent.appendChild(cancelBtn);
+      
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+    }
+
+    async function openSetCustomLevel(petIndex) {
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      
+      const modalContent = document.createElement('div');
+      modalContent.className = 'modal';
+      
+      const pets = currentUser.ownedPets.split(',');
+      const levels = currentUser.petLevels.split(',');
+      const names = currentUser.petNames.split(',');
+      
+      const currentLevel = parseInt(levels[petIndex]);
+      
+      const title = document.createElement('h3');
+      title.innerHTML = `⚙️ Set Pet Level`;
+      title.style.color = '#9b59b6';
+      modalContent.appendChild(title);
+      
+      const notice = document.createElement('div');
+      notice.style.background = '#f0f0f0';
+      notice.style.padding = '12px';
+      notice.style.borderRadius = '6px';
+      notice.style.marginBottom = '15px';
+      notice.style.border = '2px solid #9b59b6';
+      notice.innerHTML = `<strong>ℹ️ Permanent Level:</strong> This permanently changes your pet's level in battles and in your pet list.`;
+      modalContent.appendChild(notice);
+      
+      const label = document.createElement('label');
+      label.textContent = 'Enter new level:';
+      label.style.display = 'block';
+      label.style.marginBottom = '8px';
+      label.style.fontWeight = '600';
+      modalContent.appendChild(label);
+      
+      const levelInput = document.createElement('input');
+      levelInput.type = 'number';
+      levelInput.min = '1';
+      levelInput.value = currentLevel;
+      levelInput.style.width = '100%';
+      levelInput.style.padding = '12px';
+      levelInput.style.marginBottom = '15px';
+      levelInput.style.borderRadius = '6px';
+      levelInput.style.border = '2px solid #9b59b6';
+      levelInput.style.fontSize = '16px';
+      levelInput.style.boxSizing = 'border-box';
+      modalContent.appendChild(levelInput);
+      
+      const setBtn = document.createElement('button');
+      setBtn.className = 'btn';
+      setBtn.style.background = '#9b59b6';
+      setBtn.type = 'button';
+      setBtn.textContent = '✅ Update Level';
+      setBtn.onclick = async () => {
+        const newLevel = parseInt(levelInput.value);
+        
+        if (isNaN(newLevel) || newLevel < 1) {
+          showNotification('Enter a valid level (1 or higher)!', true);
+          return;
+        }
+        
+        const levelsDiff = newLevel - currentLevel;
+        const newHP = parseInt(currentUser.petCurrentHP.split(',')[petIndex] || 0) + (levelsDiff * 50);
+        
+        const levelArray = currentUser.petLevels.split(',');
+        const hpArray = currentUser.petCurrentHP.split(',');
+        levelArray[petIndex] = newLevel.toString();
+        hpArray[petIndex] = Math.max(0, newHP).toString();
+        
+        currentUser.petLevels = levelArray.join(',');
+        currentUser.petCurrentHP = hpArray.join(',');
+        
+        await window.dataSdk.update(currentUser);
+        updateUI();
+        showNotification(`${names[petIndex]}'s level set to ${newLevel}! 📈`);
+        modal.remove();
+        openInventory();
+      };
+      modalContent.appendChild(setBtn);
+      
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'btn btn-secondary';
+      cancelBtn.type = 'button';
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.onclick = () => {
+        modal.remove();
+        showSelectPetForLevelUp(999999);
+      };
+      modalContent.appendChild(cancelBtn);
+      
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+    }
+
+    const petEvolutions = {
+      'ice_neek': 'ice_caller',
+      'forest_neek': 'forest_caller',
+      'flame_neek': 'flame_caller',
+      'river_neek': 'river_caller',
+      'cloud_neek': 'cloud_caller',
+      'ice_caller': 'ice_creater',
+      'forest_caller': 'forest_creater',
+      'flame_caller': 'flame_creater',
+      'river_caller': 'river_creater',
+      'cloud_caller': 'cloud_creater',
+      'squacks': 'dualchirps',
+      'dualchirps': 'tribeak'
+    };
+
+    const petEvolutionLevels = {
+      'ice_neek': 20,
+      'forest_neek': 20,
+      'flame_neek': 20,
+      'river_neek': 20,
+      'cloud_neek': 20,
+      'ice_caller': 40,
+      'forest_caller': 40,
+      'flame_caller': 40,
+      'river_caller': 40,
+      'cloud_caller': 40,
+      'squacks': 20,
+      'dualchirps': 40,
+      'ice_creater': 0,
+      'forest_creater': 0,
+      'flame_creater': 0,
+      'river_creater': 0,
+      'cloud_creater': 0
+    };
+
+    const petEmojiEvolutions = {
+      '❄️': '🌲🔥',
+      '🌲': '☁️🔥',
+      '🔥🟠': '❄️🔥',
+      '💧': '💧🔥',
+      '☁️': '☁️🌟',
+      '🌲🔥': '❄️🌟',
+      '☁️🔥': '🌲🌟',
+      '❄️🔥': '☁️🌟',
+      '💧🔥': '💧🌟',
+      '☁️🌟': '❄️🌟'
+    };
+
+    function canEvolve(petType) {
+      return petEvolutions[petType] !== undefined;
+    }
+
+    function getEvolutionInfo(petType) {
+      const evolved = petEvolutions[petType];
+      if (!evolved) return null;
+      return {
+        newType: evolved,
+        newName: petNamesByType[evolved],
+        newHP: petHPByType[evolved],
+        newRarity: petRarityByType[evolved]
+      };
+    }
+
+    function openMergePetsDialog() {
+      if (!currentUser.ownedPets || currentUser.ownedPets === '') {
+        showNotification('No pets to merge!', true);
+        return;
+      }
+
+      const pets = currentUser.ownedPets.split(',');
+      
+      if (pets.length < 2) {
+        showNotification('You need at least 2 pets to merge!', true);
+        return;
+      }
+
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      
+      const modalContent = document.createElement('div');
+      modalContent.className = 'modal';
+      
+      const title = document.createElement('h3');
+      title.textContent = '🔗 Merge Pets';
+      title.style.color = '#9b59b6';
+      modalContent.appendChild(title);
+
+      const info = document.createElement('div');
+      info.className = 'message info-message';
+      info.innerHTML = '✨ <strong>Merge two IDENTICAL pets</strong> to make them more powerful!<br>The merged pet gets <strong>combined HP and increased power</strong>.<br><br>💡 <strong>You need 2 of the SAME pet</strong> to merge. Different pet types cannot be merged!';
+      modalContent.appendChild(info);
+
+      const petsByEmoji = {};
+      pets.forEach((pet, idx) => {
+        if (!petsByEmoji[pet]) petsByEmoji[pet] = [];
+        petsByEmoji[pet].push(idx);
+      });
+
+      const mergeableEmojis = Object.keys(petsByEmoji).filter(emoji => petsByEmoji[emoji].length >= 2);
+
+      if (mergeableEmojis.length === 0) {
+        const warning = document.createElement('div');
+        warning.className = 'message error-message';
+        warning.innerHTML = '❌ <strong>You need 2 of the SAME pet</strong> to merge!<br><br>Current pets: ' + pets.join(', ') + '<br><br>Get duplicate pets from Pet Seeds or the shop to merge!';
+        modalContent.appendChild(warning);
+        
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'btn btn-secondary';
+        closeBtn.type = 'button';
+        closeBtn.textContent = 'Close';
+        closeBtn.onclick = () => modal.remove();
+        modalContent.appendChild(closeBtn);
+        
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
+        return;
+      }
+
+      const rarities = currentUser.petRarities.split(',');
+      const levels = currentUser.petLevels.split(',');
+      const names = currentUser.petNames.split(',');
+      const hps = currentUser.petCurrentHP.split(',');
+
+      mergeableEmojis.forEach(emoji => {
+        const indices = petsByEmoji[emoji];
+        
+        const groupDiv = document.createElement('div');
+        groupDiv.style.background = '#f9f9f9';
+        groupDiv.style.padding = '15px';
+        groupDiv.style.borderRadius = '8px';
+        groupDiv.style.marginBottom = '15px';
+        groupDiv.style.border = '2px solid #9b59b6';
+
+        const groupTitle = document.createElement('div');
+        groupTitle.style.fontWeight = '700';
+        groupTitle.style.fontSize = '16px';
+        groupTitle.style.marginBottom = '12px';
+        groupTitle.style.color = '#2c3e50';
+        groupTitle.innerHTML = `${emoji} <strong>${names[indices[0]]}</strong> <span style="color: #95a5a6;">(${indices.length} available)</span>`;
+        groupDiv.appendChild(groupTitle);
+
+        const buttonsDiv = document.createElement('div');
+        buttonsDiv.style.display = 'flex';
+        buttonsDiv.style.gap = '8px';
+        buttonsDiv.style.flexWrap = 'wrap';
+
+        for (let i = 0; i < indices.length - 1; i++) {
+          for (let j = i + 1; j < indices.length; j++) {
+            const idx1 = indices[i];
+            const idx2 = indices[j];
+            
+            const petInfo1 = `Lv.${levels[idx1]} (${hps[idx1]} HP)`;
+            const petInfo2 = `Lv.${levels[idx2]} (${hps[idx2]} HP)`;
+            
+            const mergeBtn = document.createElement('button');
+            mergeBtn.className = 'btn-small';
+            mergeBtn.style.background = '#9b59b6';
+            mergeBtn.style.fontSize = '12px';
+            mergeBtn.type = 'button';
+            mergeBtn.textContent = `Merge: ${petInfo1} + ${petInfo2}`;
+            mergeBtn.onclick = () => {
+              modal.remove();
+              executeMergePets(idx1, idx2);
+            };
+            buttonsDiv.appendChild(mergeBtn);
+          }
+        }
+
+        groupDiv.appendChild(buttonsDiv);
+        modalContent.appendChild(groupDiv);
+      });
+
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'btn btn-secondary';
+      cancelBtn.type = 'button';
+      cancelBtn.textContent = 'Close';
+      cancelBtn.style.marginTop = '15px';
+      cancelBtn.onclick = () => modal.remove();
+      modalContent.appendChild(cancelBtn);
+
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+    }
+
+    async function executeMergePets(idx1, idx2) {
+      const pets = currentUser.ownedPets.split(',');
+      const rarities = currentUser.petRarities.split(',');
+      const levels = currentUser.petLevels.split(',');
+      const names = currentUser.petNames.split(',');
+      const hps = currentUser.petCurrentHP.split(',');
+
+      const hp1 = parseInt(hps[idx1]);
+      const hp2 = parseInt(hps[idx2]);
+
+      // Keep the first pet, merge HP for increased defense
+      const mergedHP = hp1 + hp2; // Combined HP for better defense
+
+      hps[idx1] = mergedHP.toString();
+
+      // Remove the second pet (use higher index first to avoid index shifting)
+      const removeIdx = idx1 > idx2 ? idx1 : idx2;
+      const keepIdx = idx1 > idx2 ? idx2 : idx1;
+
+      pets.splice(removeIdx, 1);
+      rarities.splice(removeIdx, 1);
+      levels.splice(removeIdx, 1);
+      names.splice(removeIdx, 1);
+      hps.splice(removeIdx, 1);
+
+      currentUser.ownedPets = pets.join(',');
+      currentUser.petRarities = rarities.join(',');
+      currentUser.petLevels = levels.join(',');
+      currentUser.petNames = names.join(',');
+      currentUser.petCurrentHP = hps.join(',');
+
+      await window.dataSdk.update(currentUser);
+      updateUI();
+      showNotification(`✨ Successfully merged! ${names[keepIdx]} now has ${mergedHP} HP and deals more damage in battles! 💪⚔️`);
+      openPets();
+    }
+
+    function openPets() {
+      document.getElementById('currentScreenTitle').textContent = '🐾 My Pets';
+      const content = document.getElementById('mainContent');
+      content.innerHTML = '';
+      
+      const container = document.createElement('div');
+      
+      const title = document.createElement('h2');
+      title.textContent = '🐾 My Pets';
+      title.style.marginBottom = '20px';
+      container.appendChild(title);
+      
+      const myPetsSection = document.createElement('div');
+      myPetsSection.style.marginBottom = '30px';
+      myPetsSection.style.paddingBottom = '20px';
+      myPetsSection.style.borderBottom = '3px solid #667eea';
+      
+      const myPetsTitle = document.createElement('h3');
+      myPetsTitle.textContent = 'My Pets';
+      myPetsTitle.style.marginBottom = '15px';
+      myPetsSection.appendChild(myPetsTitle);
+      
+      if (!currentUser.ownedPets || currentUser.ownedPets === '') {
+        const info = document.createElement('div');
+        info.className = 'message info-message';
+        info.textContent = 'No pets yet! Add pets below or buy Pet Seeds from the shop.';
+        myPetsSection.appendChild(info);
+      }
+      
+      if (currentUser.ownedPets && currentUser.ownedPets !== '') {
+        const pets = currentUser.ownedPets.split(',');
+        const rarities = currentUser.petRarities ? currentUser.petRarities.split(',') : [];
+        const levels = currentUser.petLevels ? currentUser.petLevels.split(',') : [];
+        const names = currentUser.petNames ? currentUser.petNames.split(',') : [];
+        const hps = currentUser.petCurrentHP ? currentUser.petCurrentHP.split(',') : [];
+        
+        const petsGridDiv = document.createElement('div');
+        petsGridDiv.style.display = 'grid';
+        petsGridDiv.style.gridTemplateColumns = 'repeat(auto-fill, minmax(140px, 1fr))';
+        petsGridDiv.style.gap = '15px';
+        
+        pets.forEach((pet, index) => {
+          const name = names[index] || 'pet';
+          const level = levels[index] || '1';
+          const rarity = rarities[index] || 'common';
+          
+          const petCard = document.createElement('div');
+          petCard.style.background = '#34495e';
+          petCard.style.border = '3px solid #3498db';
+          petCard.style.borderRadius = '10px';
+          petCard.style.padding = '15px';
+          petCard.style.display = 'flex';
+          petCard.style.flexDirection = 'column';
+          petCard.style.alignItems = 'center';
+          petCard.style.gap = '10px';
+          petCard.style.cursor = 'pointer';
+          petCard.style.transition = 'all 0.3s ease';
+          
+          petCard.onmouseover = () => {
+            petCard.style.borderColor = '#2ecc71';
+            petCard.style.background = '#2c3e50';
+            petCard.style.transform = 'translateY(-5px)';
+            petCard.style.boxShadow = '0 8px 16px rgba(46, 204, 113, 0.3)';
+          };
+          
+          petCard.onmouseout = () => {
+            petCard.style.borderColor = '#3498db';
+            petCard.style.background = '#34495e';
+            petCard.style.transform = 'translateY(0)';
+            petCard.style.boxShadow = 'none';
+          };
+          
+          const emoji = document.createElement('div');
+          emoji.style.fontSize = '48px';
+          emoji.textContent = pet;
+          petCard.appendChild(emoji);
+          
+          const petName = document.createElement('div');
+          petName.style.fontWeight = '700';
+          petName.style.fontSize = '14px';
+          petName.style.color = '#ecf0f1';
+          petName.style.textAlign = 'center';
+          petName.textContent = name;
+          petCard.appendChild(petName);
+          
+          // Only add merge button if there are 2+ of THIS EXACT PET
+          const petCount = pets.filter(p => p === pet).length;
+          if (petCount >= 2) {
+            const mergeBtn = document.createElement('button');
+            mergeBtn.className = 'btn-small';
+            mergeBtn.style.background = '#9b59b6';
+            mergeBtn.style.width = '100%';
+            mergeBtn.style.marginTop = '8px';
+            mergeBtn.type = 'button';
+            mergeBtn.textContent = '🔗 Merge';
+            mergeBtn.onclick = openMergePetsDialog;
+            petCard.appendChild(mergeBtn);
+          }
+          
+          const levelText = document.createElement('div');
+          levelText.style.fontSize = '12px';
+          levelText.style.color = '#bdc3c7';
+          levelText.textContent = `Lv. ${level}`;
+          petCard.appendChild(levelText);
+          
+          const rarityBadge = document.createElement('div');
+          rarityBadge.className = `rarity-${rarity}`;
+          rarityBadge.style.fontSize = '11px';
+          rarityBadge.style.padding = '4px 8px';
+          rarityBadge.style.borderRadius = '4px';
+          rarityBadge.style.fontWeight = '700';
+          rarityBadge.textContent = rarity.toUpperCase();
+          petCard.appendChild(rarityBadge);
+          
+          const petType = petTypes[pet];
+          const rarityValue = rarity;
+          const levelValue = parseInt(level);
+          
+          const rarityMultiplier = {
+            'common': 1,
+            'uncommon': 2,
+            'rare': 5,
+            'epic': 10,
+            'legendary': 20,
+            'supreme': 50,
+            'exclusive': 100
+          };
+          
+          const sellPrice = Math.floor(50 * rarityMultiplier[rarityValue] * levelValue);
+          const hasEvolution = canEvolve(petType);
+          const evolutionInfo = hasEvolution ? getEvolutionInfo(petType) : null;
+          const requiredLevel = petEvolutionLevels[petType] || 20;
+          
+          let actionButtons = `<button class="btn-small" type="button" onclick="editPet(${index})">✏️ Edit</button>`;
+          actionButtons += ` <button class="btn-small" type="button" onclick="sellPet(${index}, ${sellPrice})">💰 Sell</button>`;
+          
+          // Only show merge button if there are 2+ of THIS EXACT PET
+          const petCount = pets.filter(p => p === pet).length;
+          if (petCount >= 2) {
+            actionButtons += ` <button class="btn-small" style="background: #9b59b6;" type="button" onclick="openMergePetsDialog()">🔗 Merge</button>`;
+          }
+          
+          if (hasEvolution && levelValue >= requiredLevel) {
+            actionButtons += ` <button class="btn-small" style="background: #f39c12;" type="button" onclick="evolvePet(${index})">✨ Evolve</button>`;
+          }
+          
+          const buttonsDiv = document.createElement('div');
+          buttonsDiv.innerHTML = actionButtons;
+          buttonsDiv.style.width = '100%';
+          buttonsDiv.style.display = 'flex';
+          buttonsDiv.style.gap = '5px';
+          buttonsDiv.style.flexWrap = 'wrap';
+          petCard.appendChild(buttonsDiv);
+          
+          petsGridDiv.appendChild(petCard);
+        });
+        
+        myPetsSection.appendChild(petsGridDiv);
+      }
+      
+      container.appendChild(myPetsSection);
+      
+      content.appendChild(container);
+    }
+
+    async function editPet(petIndex) {
+      const pets = currentUser.ownedPets.split(',');
+      const rarities = currentUser.petRarities.split(',');
+      const levels = currentUser.petLevels.split(',');
+      const names = currentUser.petNames.split(',');
+      
+      const modal = document.createElement('div');
+      modal.className = 'modal-overlay';
+      
+      const modalContent = document.createElement('div');
+      modalContent.className = 'modal';
+      
+      const title = document.createElement('h3');
+      title.textContent = '✏️ Edit Pet';
+      modalContent.appendChild(title);
+      
+      const nameLabel = document.createElement('label');
+      nameLabel.textContent = 'Pet Name:';
+      nameLabel.style.display = 'block';
+      nameLabel.style.marginBottom = '5px';
+      nameLabel.style.fontWeight = '600';
+      modalContent.appendChild(nameLabel);
+      
+      const nameInput = document.createElement('input');
+      nameInput.type = 'text';
+      nameInput.id = 'editPetName';
+      nameInput.value = names[petIndex];
+      nameInput.placeholder = 'Enter pet name';
+      nameInput.style.width = '100%';
+      nameInput.style.padding = '10px';
+      nameInput.style.marginBottom = '15px';
+      nameInput.style.borderRadius = '6px';
+      nameInput.style.border = '2px solid #e0e0e0';
+      nameInput.style.boxSizing = 'border-box';
+      modalContent.appendChild(nameInput);
+      
+      const saveBtn = document.createElement('button');
+      saveBtn.className = 'btn';
+      saveBtn.type = 'button';
+      saveBtn.textContent = '✅ Save';
+      saveBtn.onclick = async () => {
+        const newName = document.getElementById('editPetName').value.trim();
+        if (!newName) {
+          showNotification('Enter a pet name!', true);
+          return;
+        }
+        
+        names[petIndex] = newName;
+        currentUser.petNames = names.join(',');
+        await window.dataSdk.update(currentUser);
+        updateUI();
+        showNotification(`Pet renamed to ${newName}! 📝`);
+        modal.remove();
+        openPets();
+      };
+      modalContent.appendChild(saveBtn);
+      
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'btn btn-secondary';
+      cancelBtn.type = 'button';
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.onclick = () => modal.remove();
+      modalContent.appendChild(cancelBtn);
+      
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+    }
+
+    async function evolvePet(petIndex) {
+      const pets = currentUser.ownedPets.split(',');
+      const rarities = currentUser.petRarities.split(',');
+      const levels = currentUser.petLevels.split(',');
+      const names = currentUser.petNames.split(',');
+      const hps = currentUser.petCurrentHP.split(',');
+      
+      const petEmoji = pets[petIndex];
+      const petType = petTypes[petEmoji];
+      const currentLevel = parseInt(levels[petIndex]);
+      const requiredLevel = petEvolutionLevels[petType] || 20;
+      
+      if (currentLevel < requiredLevel) {
+        showNotification(`Pet must be level ${requiredLevel}+ to evolve!`, true);
+        return;
+      }
+      
+      const evolutionInfo = getEvolutionInfo(petType);
+      if (!evolutionInfo) {
+        showNotification('This pet cannot evolve!', true);
+        return;
+      }
+      
+      const newEmoji = Object.keys(petTypes).find(emoji => petTypes[emoji] === evolutionInfo.newType);
+      
+      pets[petIndex] = newEmoji;
+      rarities[petIndex] = evolutionInfo.newRarity;
+      names[petIndex] = evolutionInfo.newName;
+      hps[petIndex] = evolutionInfo.newHP.toString();
+      
+      currentUser.ownedPets = pets.join(',');
+      currentUser.petRarities = rarities.join(',');
+      currentUser.petNames = names.join(',');
+      currentUser.petCurrentHP = hps.join(',');
+      
+      await window.dataSdk.update(currentUser);
+      updateUI();
+      showNotification(`${names[petIndex - 1]} evolved into ${evolutionInfo.newName}! ✨`);
+      openPets();
+    }
+
+    async function sellPet(petIndex, sellPrice) {
+      const pets = currentUser.ownedPets.split(',');
+      const rarities = currentUser.petRarities.split(',');
+      const levels = currentUser.petLevels.split(',');
+      const names = currentUser.petNames.split(',');
+      const hps = currentUser.petCurrentHP.split(',');
+      
+      const petName = names[petIndex];
+      
+      pets.splice(petIndex, 1);
+      rarities.splice(petIndex, 1);
+      levels.splice(petIndex, 1);
+      names.splice(petIndex, 1);
+      hps.splice(petIndex, 1);
+      
+      currentUser.ownedPets = pets.join(',');
+      currentUser.petRarities = rarities.join(',');
+      currentUser.petLevels = levels.join(',');
+      currentUser.petNames = names.join(',');
+      currentUser.petCurrentHP = hps.join(',');
+      
+      if (currentUser.role !== 'owner') {
+        currentUser.coins = (currentUser.coins || 0) + sellPrice;
+      }
+      
+      await window.dataSdk.update(currentUser);
+      updateUI();
+      showNotification(`Sold ${petName} for ${sellPrice} coins! 💰`);
+      openPets();
+    }
+
+    // Wait for SDK to be available, then initialize
+    async function setupApp() {
+      // Wait for data SDK to exist
+      let attempts = 0;
+      while (!window.dataSdk && attempts < 100) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+        attempts++;
+      }
+      
+      if (!window.dataSdk) {
+        showLoginMessage('App failed to initialize. Please refresh.', 'error');
+        return;
+      }
+      
+      // SDK is ready, now initialize
+      await initApp();
+      
+      if (checkSchoolHours()) {
+        const schoolField = document.getElementById('schoolPasswordField');
+        if (schoolField) schoolField.style.display = 'block';
+      }
+    }
+
+    // Start SDK setup immediately
+    setupApp().catch(err => {
+      showLoginMessage('Error: ' + err.message, 'error');
+    });
+    
+    // Setup button handlers immediately with multiple retry attempts
+    function setupButtonHandlers() {
+      const btnSignIn = document.getElementById('btnSignIn');
+      const btnCreateAccount = document.getElementById('btnCreateAccount');
+      const btnRegister = document.getElementById('btnRegister');
+      const btnBackToLogin = document.getElementById('btnBackToLogin');
+      
+      let setupComplete = false;
+      
+      if (btnSignIn) {
+        btnSignIn.onclick = (e) => {
+          if (e) e.preventDefault();
+          handleLogin();
+        };
+        setupComplete = true;
+      }
+      
+      if (btnCreateAccount) {
+        btnCreateAccount.onclick = (e) => {
+          if (e) e.preventDefault();
+          showRegister();
+        };
+        setupComplete = true;
+      }
+      
+      if (btnRegister) {
+        btnRegister.onclick = (e) => {
+          if (e) e.preventDefault();
+          handleRegister();
+        };
+        setupComplete = true;
+      }
+      
+      if (btnBackToLogin) {
+        btnBackToLogin.onclick = (e) => {
+          if (e) e.preventDefault();
+          showLogin();
+        };
+        setupComplete = true;
+      }
+      
+      return setupComplete;
+    }
+    
+    // Try to setup handlers immediately
+    if (!setupButtonHandlers()) {
+      // If not found, retry after 50ms
+      setTimeout(setupButtonHandlers, 50);
+      // And again after 150ms
+      setTimeout(setupButtonHandlers, 150);
+    }
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9e517ee1b10f1933',t:'MTc3NDk4MjU2NC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
